@@ -1,0 +1,50 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="9RQFg8i_QcwE3W0L0IOk">
+    <mxGraphModel dx="1414" dy="751" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="YIyBB8WEK1H-4nywpNXv-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad9d5;strokeColor=#ae4132;" value="Utilisateur&lt;div&gt;(navigateur)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="360" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="YIyBB8WEK1H-4nywpNXv-2" edge="1" parent="1" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="YIyBB8WEK1H-4nywpNXv-1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="420" y="160" as="sourcePoint" />
+            <mxPoint x="440" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YIyBB8WEK1H-4nywpNXv-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" value="Front-end&lt;div&gt;React : application web responsive&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="220" x="310" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="YIyBB8WEK1H-4nywpNXv-4" edge="1" parent="1" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="YIyBB8WEK1H-4nywpNXv-3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="420" y="300" as="sourcePoint" />
+            <mxPoint x="440" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YIyBB8WEK1H-4nywpNXv-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcd28;gradientColor=#ffa500;strokeColor=#d79b00;" value="API IA&lt;div&gt;(à confirmer)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="360" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="YIyBB8WEK1H-4nywpNXv-6" edge="1" parent="1" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.05;entryY=1.017;entryDx=0;entryDy=0;entryPerimeter=0;" target="YIyBB8WEK1H-4nywpNXv-3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points" />
+            <mxPoint x="270" y="300" as="sourcePoint" />
+            <mxPoint x="440" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YIyBB8WEK1H-4nywpNXv-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bac8d3;strokeColor=#23445d;" value="PostgreSQL&lt;div&gt;Base de données&lt;/div&gt;&lt;div&gt;+&lt;/div&gt;&lt;div&gt;données Ciqual importées&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="150" x="130" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="YIyBB8WEK1H-4nywpNXv-8" edge="1" parent="1" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.959;entryY=1.05;entryDx=0;entryDy=0;entryPerimeter=0;" target="YIyBB8WEK1H-4nywpNXv-3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="560" y="300" as="sourcePoint" />
+            <mxPoint x="440" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YIyBB8WEK1H-4nywpNXv-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;" value="OpenFoodFacts&lt;div&gt;API produits scannés&lt;/div&gt;&lt;div&gt;Codes-barres&lt;/div&gt;&lt;div&gt;(Should Have)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="550" y="300" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
