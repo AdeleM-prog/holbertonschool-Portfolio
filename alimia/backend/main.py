@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine
+from database import engine, Base
+from models.user import User
+
 
 app = FastAPI()
 
@@ -17,6 +19,7 @@ def startup():
     try:
         conn = engine.connect()
         conn.close()
+        Base.metadata.create_all(bind=engine)
         print("Connexion à la base de données réussie")
     except Exception as e:
         print(f"Erreur de connexion : {e}")
