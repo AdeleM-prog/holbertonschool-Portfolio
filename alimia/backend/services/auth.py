@@ -2,15 +2,19 @@ import bcrypt
 from models.user import User
 from schemas.auth import RegisterRequest, LoginRequest
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt
 from datetime import datetime, timezone, timedelta
 import os
 from dotenv import load_dotenv
+from fastapi.security import OAuth2PasswordBearer
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
+read_token = OAuth2PasswordBearer(tokenUrl="/auth/login")
+security = HTTPBearer()
 
 def register(db: Session, data: RegisterRequest):
     existing_user = db.query(User).filter(User.email == data.email).first()
@@ -46,6 +50,7 @@ def login(db: Session, data: LoginRequest):
     existing_user = db.query(User).filter(User.email == data.email).first()
     if not existing_user:
         raise HTTPException(status_code=401, detail="unvalid credentials")
+
     password_check = bcrypt.checkpw(data.password.encode('utf-8'), existing_user.password.encode('utf-8'))
     if password_check == False:
         raise HTTPException(status_code=401, detail="unvalid credentials")
@@ -71,3 +76,11 @@ def login(db: Session, data: LoginRequest):
         }
     }
 
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    try:
+        payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
+        get_token = payload.get("sub")
+    except:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return get_token

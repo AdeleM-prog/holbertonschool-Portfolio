@@ -1,5 +1,5 @@
 from schemas.auth import RegisterRequest, LoginRequest
-from services.auth import register, login
+from services.auth import register, login, verify_token
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database import get_db
@@ -15,3 +15,7 @@ def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
 def user_login(data: LoginRequest, db: Session = Depends(get_db)):
     user_log_in = login(db, data)
     return user_log_in
+
+@auth_router.get("/me")
+def auth_me(user_id: str = Depends(verify_token)):
+    return user_id
