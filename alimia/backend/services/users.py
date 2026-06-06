@@ -1,7 +1,7 @@
 from schemas.users import UserUpdateRequest
 from sqlalchemy.orm import Session
 from models.user import User
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 import bcrypt
 
 def update_user(db: Session, user_id: str, data: UserUpdateRequest):
@@ -34,3 +34,12 @@ def update_user(db: Session, user_id: str, data: UserUpdateRequest):
     db.refresh(existing_user)
 
     return {"Message": "Account updated successfully"}
+
+def delete_user(db: Session, user_id: str):
+    existing_user = db.query(User).filter(User.id == user_id).first()
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="Ressource not found")
+    
+    deleted_account = db.delete(existing_user)
+    db.commit()
+    return Response(status_code=204)
