@@ -16,7 +16,7 @@ function Login() {
     });
     const data = await response.json()
     if (response.ok === false){
-      setError(data.detail)
+      setError("Email ou mot de passe incorrect")
     }
     else if (response.ok === true){
       navigate('/dashboard')

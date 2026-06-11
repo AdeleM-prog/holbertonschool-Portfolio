@@ -2,19 +2,15 @@ import bcrypt
 from models.user import User
 from schemas.auth import RegisterRequest, LoginRequest
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import HTTPException, Depends, Request
 from jose import jwt
 from datetime import datetime, timezone, timedelta
 import os
 from dotenv import load_dotenv
-from fastapi.security import OAuth2PasswordBearer
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
-read_token = OAuth2PasswordBearer(tokenUrl="/auth/login")
-security = HTTPBearer()
 
 def register(db: Session, data: RegisterRequest):
     existing_user = db.query(User).filter(User.email == data.email).first()
@@ -24,9 +20,9 @@ def register(db: Session, data: RegisterRequest):
     hashed_password = bcrypt.hashpw(data.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     new_user = User(
-    first_name=data.first_name,
-    email=data.email,
-    password=hashed_password
+        first_name=data.first_name,
+        email=data.email,
+        password=hashed_password
     )
 
     db.add(new_user)
@@ -76,8 +72,9 @@ def login(db: Session, data: LoginRequest):
         }
     }
 
-def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials
+def verify_token(request: Request):
+    token = request.cookies.get("token")
+    print(f"Cookie reçu: {token}")
     try:
         payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
         get_token = payload.get("sub")
