@@ -1,10 +1,14 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 function Register() {
+
+  const navigate = useNavigate()
 
   const [firstName, setFirstName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
 
   async function handleSubmit(){
       const response = await fetch('http://localhost:8000/auth/register', {
@@ -14,12 +18,16 @@ function Register() {
       });
       const data = await response.json()
       if (response.ok === false) {
-        
+        setError(data.detail)
       }
-  }
-
-  return (
-    <div>
+      else if (response.ok === true) {
+        navigate('/login')
+      }
+    }
+    
+    return (
+      <div>
+      <h1>Inscription</h1>
       <input
       placeholder="firstname"
       value={firstName}
@@ -35,6 +43,8 @@ function Register() {
       value={password}
       onChange={(e) => setPassword(e.target.value)}
       />
+      <button onClick={handleSubmit}>Submit</button>
+      {error && <p>{error}</p>}
     </div>
   )
 }
