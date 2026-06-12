@@ -4,6 +4,7 @@ from database import engine, Base
 from models.user import User
 from routes.auth import auth_router
 from routes.users import users_router
+from models.food import Food
 
 app = FastAPI()
 
