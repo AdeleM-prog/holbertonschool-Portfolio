@@ -4,6 +4,8 @@ from database import engine, Base
 from models.user import User
 from routes.auth import auth_router
 from routes.users import users_router
+from routes.foods import foods_router
+from models.food import Food
 
 app = FastAPI()
 
@@ -31,3 +33,4 @@ def health_check():
 
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(foods_router)
