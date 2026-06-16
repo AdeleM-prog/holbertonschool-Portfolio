@@ -1,9 +1,16 @@
-from schemas.foods import FoodSearchResponse
 from models.food import Food
 from sqlalchemy.orm import Session
 
-
 def search_foods(db: Session, query: str):
-    existing_food = db.query(Food).filter(Food.name.ilike(f"%{query}%")).all()
-    return existing_food
-    
+    results = db.query(Food).filter(Food.name.ilike(f"%{query}%")).all()
+    return [
+        {
+            "food_id": r.id,
+            "name": r.name,
+            "calories": r.energy_cal,
+            "proteins": r.proteins,
+            "carbs": r.carbohydrates,
+            "fats": r.fats
+        }
+        for r in results
+    ]

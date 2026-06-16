@@ -3,11 +3,11 @@ from uuid import UUID
 from typing import Optional
 
 class FoodSearchResponse(BaseModel):
-    food_id: UUID = Field(alias="id")
+    food_id: UUID
     name: str
-    calories: Optional[float] = Field(alias="energy_cal", default=None)
+    calories: Optional[float] = None
     proteins: Optional[float] = None
-    carbs: Optional[float] = Field(alias="carbohydrates", default=None)
+    carbs: Optional[float] = None
     fats: Optional[float] = None
 
-    model_config = {"from_attributes": True, "populate_by_name": True}
+    model_config = {"from_attributes": True}
