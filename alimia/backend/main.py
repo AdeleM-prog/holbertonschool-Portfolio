@@ -2,9 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
 from models.user import User
+from models.household_members import HouseholdMembers
 from routes.auth import auth_router
 from routes.users import users_router
 from routes.foods import foods_router
+from routes.household_members import HH_members_router
 from models.food import Food
 
 app = FastAPI()
@@ -34,3 +36,4 @@ def health_check():
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(foods_router)
+app.include_router(HH_members_router)
