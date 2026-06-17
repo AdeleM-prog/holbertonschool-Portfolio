@@ -11,13 +11,15 @@ def create_member(db: Session, user_id:str, data:HouseholdMemberRequest):
         gender=data.gender,
         birth_date=data.date_of_birth
     )
-
     db.add(new_member)
     db.commit()
     db.refresh(new_member)
 
     return {"member_id": new_member.id}
 
+def get_members(db: Session, user_id: str):
+    user_HH_member = db.query(HouseholdMembers).filter(HouseholdMembers.user_id == user_id).all()
+    return user_HH_member
 
 def update_member(db: Session, user_id: str, member_id: str, data: HouseholdMemberUpdateRequest):
     updated_HH_member = db.query(HouseholdMembers).filter(
@@ -34,6 +36,7 @@ def update_member(db: Session, user_id: str, member_id: str, data: HouseholdMemb
     db.commit()
     db.refresh(updated_HH_member)
     return {"message": "Member updated successfully"}
+
 
 
 def delete_member(db: Session, user_id: str, member_id:str):
