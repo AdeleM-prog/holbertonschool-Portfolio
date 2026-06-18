@@ -36,9 +36,11 @@ def register(db: Session, data: RegisterRequest):
     }
 
 def create_token(user_id):
+    exp = datetime.now(timezone.utc) + timedelta(hours=1)
+    print(f"Nouveau token généré, exp: {exp}")
     payload = {
         "sub": user_id,
-        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
+        "exp": exp
     }
     return jwt.encode(payload, SECRET_KEY, ALGORITHM)
 
@@ -78,6 +80,7 @@ def verify_token(request: Request):
     try:
         payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
         get_token = payload.get("sub")
-    except:
+    except Exception as e:
+        print(f"Erreur decode: {e}")
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     return get_token
