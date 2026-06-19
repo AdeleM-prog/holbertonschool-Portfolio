@@ -3,6 +3,7 @@ import Register from "./pages/Register.jsx"
 import Login from "./pages/Login.jsx"
 import ProtectedRoute from "./pages/ProtectedRoute.jsx"
 import Profile from "./pages/Profile.jsx"
+import SearchFood from "./pages/FoodSeearch.jsx"
 
 
 function App() {
@@ -19,6 +20,11 @@ function App() {
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <div>Dashboard</div>
+          </ProtectedRoute>
+        } />
+        <Route path="/foodsearch" element={
+          <ProtectedRoute>
+            <SearchFood/>
           </ProtectedRoute>
         } />
       </Routes>

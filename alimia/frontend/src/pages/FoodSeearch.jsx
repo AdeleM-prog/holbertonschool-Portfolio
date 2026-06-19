@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 function SearchFood() {
     //
     const [research, setResearch] = useState("")
-    const [results, setResults] = useState(null)
+    const [results, setResults] = useState([])
     const [error, setError] = useState("")
 
 
@@ -32,8 +32,14 @@ function SearchFood() {
               onChange={(e) => setResearch(e.target.value)}
             />
             <button onClick={handleResearch}>Rechercher</button>
+            <h3>Résultats de la recherche</h3>
+            {results.map((data) => (
+                <div key={data.id}>
+                    <p>{data.name} {data.calories} {data.proteins} {data.carbs} {data.fats}</p>
+                </div>
+            ))}
         </div>
-  )
+    )
 }
 
 export default SearchFood
