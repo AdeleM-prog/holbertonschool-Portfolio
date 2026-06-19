@@ -21,7 +21,8 @@ function ProtectedRoute({ children }) {
   // vérification de la connexion
   useEffect(() => {
     async function checkAuth() {
-    const response = await fetch('http://localhost:8000/auth/me', {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      const response = await fetch('/api/auth/me', {
       method: 'GET',
       credentials: 'include' //sending cookie in the request
     })
