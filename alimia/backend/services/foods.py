@@ -7,6 +7,7 @@ def search_foods(db: Session, query: str):
     return [
         {
             "food_id": r.id,
+            "ciqual_code": r.ciqual_code,
             "name": r.name,
             "calories": r.energy_cal,
             "proteins": r.proteins,

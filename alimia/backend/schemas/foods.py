@@ -4,6 +4,7 @@ from typing import Optional
 
 class FoodSearchResponse(BaseModel):
     food_id: UUID
+    ciqual_code: int
     name: str
     calories: Optional[float] = None
     proteins: Optional[float] = None

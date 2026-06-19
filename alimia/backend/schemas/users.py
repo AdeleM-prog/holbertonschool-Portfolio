@@ -11,10 +11,11 @@ class UserProfile(BaseModel):
     birth_date: Optional[date] = None
     household_size: Optional[int] = None
     meals: Optional[list[str]] = None
-    dietary_constraints: Optional[str] = None
-    diet_type: Optional[str] = None
-    liked_foods: Optional[str] = None
-    disliked_foods: Optional[str] = None
+    dietary_constraints: Optional[list[str]] = None
+    dietary_constraints_other: Optional[list[str]] = None
+    diet_type: Optional[list[str]] = None
+    liked_foods: Optional[list[int]] = None
+    disliked_foods: Optional[list[int]] = None
 
     model_config = {"from_attributes": True, "populate_by_name": True}
 
@@ -27,7 +28,7 @@ class UserUpdateRequest(BaseModel):
     household_size: Optional[int] = None
     meals: Optional[list[str]] = None
     dietary_constraints: Optional[list[str]] = None
-    dietary_constraints_other: Optional[str] = None
-    diet_type: Optional[str] = None
+    dietary_constraints_other: Optional[list[str]] = None
+    diet_type: Optional[list[str]] = None
     liked_foods: Optional[list[int]] = None
     disliked_foods: Optional[list[int]] = None

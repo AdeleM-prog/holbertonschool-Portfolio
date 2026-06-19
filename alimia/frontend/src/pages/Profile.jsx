@@ -1,11 +1,23 @@
 import { useState, useEffect } from "react"
 
+
+const DIET_TYPES = ["Aucun", "Végétarien", "Vegan", "Halal", "Casher"]
+const DIETARY_CONSTRAINTS = ["Aucune", "Allergie aux fruits à coques", "Allergie aux arachides", "Intolérance au gluten / Maladie cœliaque", "Intolérance au lactose"]
+const MEALS = ["Petit-déjeuner", "Collation matinale", "Déjeuner", "Goûter", "Dîner"]
+
+
+
 function Profile() {
+
   const [profile, setProfile] = useState(null)
   const [members, setMembers] = useState([])
   const [newMember, setNewMember] = useState({ first_name: "", gender: "", date_of_birth: "" })
   const [isEditing, setIsEditing] = useState(false)
   const [error, setError] = useState("")
+  const [likedFoodSearch, setLikedFoodSearch] = useState("")
+  const [dislikedFoodSearch, setDislikedFoodSearch] = useState("")
+  const [likedFoodResults, setLikedFoodResults] = useState([])
+  const [dislikedFoodResults, setDislikedFoodResults] = useState([])
 
   useEffect(() => {
     async function fetchData() {
@@ -79,6 +91,28 @@ function Profile() {
     }
   }
 
+async function handleLikedFoodSearch() {
+  const response = await fetch(`/api/foods/search?q=${likedFoodSearch}`, {
+    method: 'GET',
+    credentials: 'include'
+  })
+  if (response.ok) {
+    const data = await response.json()
+    setLikedFoodResults(data.slice(0, 10))
+  }
+}
+
+async function handleDislikedFoodSearch() {
+  const response = await fetch(`/api/foods/search?q=${dislikedFoodSearch}`, {
+    method: 'GET',
+    credentials: 'include'
+  })
+  if (response.ok) {
+    const data = await response.json()
+    setDislikedFoodResults(data.slice(0, 10))
+  }
+}
+
   return (
     <div>
       {isEditing ? (
@@ -105,39 +139,118 @@ function Profile() {
               value={profile?.birth_date || ""}
               onChange={(e) => setProfile({ ...profile, birth_date: e.target.value })}
             />
-            <input
-              placeholder="Genre"
+            <select
               value={profile?.gender || ""}
               onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-            />
-            <input
-              placeholder="Repas"
-              value={profile?.meals || ""}
-              onChange={(e) => setProfile({ ...profile, meals: e.target.value })}
-            />
+            >
+              <option value="">Genre</option>
+              <option value="Femme">Femme</option>
+              <option value="Homme">Homme</option>
+            </select>
+            <div>
+              {MEALS.map((type) => (
+                <label key={type}>
+                  <input
+                    type="checkbox"
+                    checked={profile?.meals?.includes(type) || false}
+                    onChange={(e) => {
+                      const current = profile?.meals || []
+                      if (e.target.checked) {
+                        setProfile({...profile, meals: [...current, type]})
+                      } else {
+                        setProfile({...profile, meals: current.filter(t => t !== type)})
+                      }
+                    }}
+                  />
+              {type}
+              </label>
+            ))}
           </div>
+        </div>
           <h3>Alimentation</h3>
           <div>
-            <input
-              placeholder="Régime alimentaire"
-              value={profile?.diet_type || ""}
-              onChange={(e) => setProfile({ ...profile, diet_type: e.target.value })}
-            />
-            <input
-              placeholder="Contraintes alimentaires"
-              value={profile?.dietary_constraints || ""}
-              onChange={(e) => setProfile({ ...profile, dietary_constraints: e.target.value })}
-            />
-            <input
-              placeholder="Aliments préférés"
-              value={profile?.liked_foods || ""}
-              onChange={(e) => setProfile({ ...profile, liked_foods: e.target.value })}
-            />
-            <input
-              placeholder="Aliments à éviter"
-              value={profile?.disliked_foods || ""}
-              onChange={(e) => setProfile({ ...profile, disliked_foods: e.target.value })}
-            />
+          <div>
+            {DIET_TYPES.map((type) => (
+              <label key={type}>
+                <input
+                  type="checkbox"
+                  checked={profile?.diet_type?.includes(type) || false}
+                  onChange={(e) => {
+                    const current = profile?.diet_type || []
+                    if (e.target.checked) {
+                      setProfile({...profile, diet_type: [...current, type]})
+                    } else {
+                      setProfile({...profile, diet_type: current.filter(t => t !== type)})
+                    }
+                  }}
+                />
+                {type}
+              </label>
+            ))}
+          </div>
+          <div>
+            {DIETARY_CONSTRAINTS.map((type) => (
+              <label key={type}>
+                <input
+                type="checkbox"
+                checked={profile?.dietary_constraints?.includes(type) || false}
+                onChange={(e) => {
+                  const current = profile?.dietary_constraints || []
+                  if (e.target.checked) {
+                    setProfile({...profile, dietary_constraints: [...current, type]})
+                  } else {
+                    setProfile({...profile, dietary_constraints: current.filter(t => t !== type)})
+                  }
+                }}
+                />
+                {type}
+              </label>
+            ))}
+          </div>
+            <h3>Aliments préférés</h3>
+            <div>
+              <input
+                placeholder="Rechercher un aliment"
+                value={likedFoodSearch}
+                onChange={(e) => setLikedFoodSearch(e.target.value)}
+              />
+              <button onClick={handleLikedFoodSearch}>Rechercher</button>
+              {likedFoodResults.map((food) => (
+                <div key={food.food_id}>
+                <button onClick={() => {
+                  console.log("clic sur", food.name, food.ciqual_code)
+                  console.log("liked_foods actuel:", profile?.liked_foods)
+                  const current = profile?.liked_foods || []
+                  if (!current.includes(food.ciqual_code)) {
+                    setProfile({...profile, liked_foods: [...current, food.ciqual_code]})
+                  }
+                }}>
+                  {food.name}
+                </button>
+                </div>
+              ))}
+            </div>
+            <h3>Je n'aime pas</h3>
+            <div>
+              <input
+                placeholder="Rechercher un aliment"
+                value={dislikedFoodSearch}
+                onChange={(e) => setDislikedFoodSearch(e.target.value)}
+              />
+              <button onClick={handleDislikedFoodSearch}>Rechercher</button>
+              {dislikedFoodResults.map((food) => (
+                <div key={food.food_id}>
+                  <button onClick={() => {
+                    const current = profile?.disliked_foods || []
+                    if (!current.includes(food.ciqual_code)) {
+                      setProfile({...profile, disliked_foods: [...current, food.ciqual_code]})
+                    }
+                  }}>
+                    {food.name}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
           <h3>Membres du foyer</h3>
           {members.map((member, index) => (
@@ -158,11 +271,14 @@ function Profile() {
               value={newMember.first_name}
               onChange={(e) => setNewMember({ ...newMember, first_name: e.target.value })}
             />
-            <input
-              placeholder="Genre"
+            <select
               value={newMember.gender}
               onChange={(e) => setNewMember({ ...newMember, gender: e.target.value })}
-            />
+            >
+              <option value="">Genre</option>
+              <option value="Femme">Femme</option>
+              <option value="Homme">Homme</option>
+            </select>
             <input
               type="date"
               value={newMember.date_of_birth}
