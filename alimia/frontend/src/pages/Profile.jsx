@@ -1,14 +1,10 @@
 import { useState, useEffect } from "react"
 
-
 const DIET_TYPES = ["Aucun", "Végétarien", "Vegan", "Halal", "Casher"]
 const DIETARY_CONSTRAINTS = ["Aucune", "Allergie aux fruits à coques", "Allergie aux arachides", "Intolérance au gluten / Maladie cœliaque", "Intolérance au lactose"]
 const MEALS = ["Petit-déjeuner", "Collation matinale", "Déjeuner", "Goûter", "Dîner"]
 
-
-
 function Profile() {
-
   const [profile, setProfile] = useState(null)
   const [members, setMembers] = useState([])
   const [newMember, setNewMember] = useState({ first_name: "", gender: "", date_of_birth: "" })
@@ -18,6 +14,8 @@ function Profile() {
   const [dislikedFoodSearch, setDislikedFoodSearch] = useState("")
   const [likedFoodResults, setLikedFoodResults] = useState([])
   const [dislikedFoodResults, setDislikedFoodResults] = useState([])
+  const [likedFoodsList, setLikedFoodsList] = useState([])
+  const [dislikedFoodsList, setDislikedFoodsList] = useState([])
 
   useEffect(() => {
     async function fetchData() {
@@ -41,6 +39,24 @@ function Profile() {
         setMembers(dataMembers)
       } else {
         setError("Membres du foyer non accessibles")
+      }
+
+      const responseLiked = await fetch('/api/users/me/liked-foods/', {
+        method: 'GET',
+        credentials: 'include'
+      })
+      const dataLiked = await responseLiked.json()
+      if (responseLiked.ok) {
+        setLikedFoodsList(dataLiked)
+      }
+
+      const responseDisliked = await fetch('/api/users/me/disliked-foods/', {
+        method: 'GET',
+        credentials: 'include'
+      })
+      const dataDisliked = await responseDisliked.json()
+      if (responseDisliked.ok) {
+        setDislikedFoodsList(dataDisliked)
       }
     }
     fetchData()
@@ -81,7 +97,7 @@ function Profile() {
     const response = await fetch('/api/users/me/household-members/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // envoie le token
+      credentials: 'include',
       body: JSON.stringify(newMember)
     })
     if (response.ok) {
@@ -91,27 +107,80 @@ function Profile() {
     }
   }
 
-async function handleLikedFoodSearch() {
-  const response = await fetch(`/api/foods/search?q=${likedFoodSearch}`, {
-    method: 'GET',
+  async function handleRemoveMember(member_id) {
+  const response = await fetch(`/api/users/me/household-members/${member_id}`, {
+    method: 'DELETE',
     credentials: 'include'
   })
   if (response.ok) {
-    const data = await response.json()
-    setLikedFoodResults(data.slice(0, 10))
-  }
-}
+    setMembers(members.filter(m => m.id !== member_id))
+  }}
 
-async function handleDislikedFoodSearch() {
-  const response = await fetch(`/api/foods/search?q=${dislikedFoodSearch}`, {
-    method: 'GET',
-    credentials: 'include'
-  })
-  if (response.ok) {
-    const data = await response.json()
-    setDislikedFoodResults(data.slice(0, 10))
+  async function handleLikedFoodSearch() {
+    const response = await fetch(`/api/foods/search?q=${likedFoodSearch}`, {
+      method: 'GET',
+      credentials: 'include'
+    })
+    if (response.ok) {
+      const data = await response.json()
+      setLikedFoodResults(data.slice(0, 10))
+    }
   }
-}
+
+  async function handleDislikedFoodSearch() {
+    const response = await fetch(`/api/foods/search?q=${dislikedFoodSearch}`, {
+      method: 'GET',
+      credentials: 'include'
+    })
+    if (response.ok) {
+      const data = await response.json()
+      setDislikedFoodResults(data.slice(0, 10))
+    }
+  }
+
+  async function handleAddLikedFood(food) {
+    const response = await fetch('/api/users/me/liked-foods/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ food_id: food.food_id })
+    })
+    if (response.ok) {
+      setLikedFoodsList([...likedFoodsList, { food_id: food.food_id, name: food.name }])
+    }
+  }
+
+  async function handleAddDislikedFood(food) {
+    const response = await fetch('/api/users/me/disliked-foods/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ food_id: food.food_id })
+    })
+    if (response.ok) {
+      setDislikedFoodsList([...dislikedFoodsList, { food_id: food.food_id, name: food.name }])
+    }
+  }
+
+  async function handleRemoveLikedFood(food_id) {
+    const response = await fetch(`/api/users/me/liked-foods/${food_id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+    if (response.ok) {
+      setLikedFoodsList(likedFoodsList.filter(f => f.food_id !== food_id))
+    }
+  }
+
+  async function handleRemoveDislikedFood(food_id) {
+    const response = await fetch(`/api/users/me/disliked-foods/${food_id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+    if (response.ok) {
+      setDislikedFoodsList(dislikedFoodsList.filter(f => f.food_id !== food_id))
+    }
+  }
 
   return (
     <div>
@@ -162,51 +231,51 @@ async function handleDislikedFoodSearch() {
                       }
                     }}
                   />
-              {type}
-              </label>
-            ))}
+                  {type}
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
           <h3>Alimentation</h3>
           <div>
-          <div>
-            {DIET_TYPES.map((type) => (
-              <label key={type}>
-                <input
-                  type="checkbox"
-                  checked={profile?.diet_type?.includes(type) || false}
-                  onChange={(e) => {
-                    const current = profile?.diet_type || []
-                    if (e.target.checked) {
-                      setProfile({...profile, diet_type: [...current, type]})
-                    } else {
-                      setProfile({...profile, diet_type: current.filter(t => t !== type)})
-                    }
-                  }}
-                />
-                {type}
-              </label>
-            ))}
-          </div>
-          <div>
-            {DIETARY_CONSTRAINTS.map((type) => (
-              <label key={type}>
-                <input
-                type="checkbox"
-                checked={profile?.dietary_constraints?.includes(type) || false}
-                onChange={(e) => {
-                  const current = profile?.dietary_constraints || []
-                  if (e.target.checked) {
-                    setProfile({...profile, dietary_constraints: [...current, type]})
-                  } else {
-                    setProfile({...profile, dietary_constraints: current.filter(t => t !== type)})
-                  }
-                }}
-                />
-                {type}
-              </label>
-            ))}
-          </div>
+            <div>
+              {DIET_TYPES.map((type) => (
+                <label key={type}>
+                  <input
+                    type="checkbox"
+                    checked={profile?.diet_type?.includes(type) || false}
+                    onChange={(e) => {
+                      const current = profile?.diet_type || []
+                      if (e.target.checked) {
+                        setProfile({...profile, diet_type: [...current, type]})
+                      } else {
+                        setProfile({...profile, diet_type: current.filter(t => t !== type)})
+                      }
+                    }}
+                  />
+                  {type}
+                </label>
+              ))}
+            </div>
+            <div>
+              {DIETARY_CONSTRAINTS.map((type) => (
+                <label key={type}>
+                  <input
+                    type="checkbox"
+                    checked={profile?.dietary_constraints?.includes(type) || false}
+                    onChange={(e) => {
+                      const current = profile?.dietary_constraints || []
+                      if (e.target.checked) {
+                        setProfile({...profile, dietary_constraints: [...current, type]})
+                      } else {
+                        setProfile({...profile, dietary_constraints: current.filter(t => t !== type)})
+                      }
+                    }}
+                  />
+                  {type}
+                </label>
+              ))}
+            </div>
             <h3>Aliments préférés</h3>
             <div>
               <input
@@ -217,20 +286,21 @@ async function handleDislikedFoodSearch() {
               <button onClick={handleLikedFoodSearch}>Rechercher</button>
               {likedFoodResults.map((food) => (
                 <div key={food.food_id}>
-                <button onClick={() => {
-                  console.log("clic sur", food.name, food.ciqual_code)
-                  console.log("liked_foods actuel:", profile?.liked_foods)
-                  const current = profile?.liked_foods || []
-                  if (!current.includes(food.ciqual_code)) {
-                    setProfile({...profile, liked_foods: [...current, food.ciqual_code]})
-                  }
-                }}>
-                  {food.name}
-                </button>
+                  <button onClick={() => handleAddLikedFood(food)}>
+                    {food.name}
+                  </button>
                 </div>
               ))}
+              <div>
+                {likedFoodsList.map((item) => (
+                  <p key={item.food_id}>
+                    {item.name}
+                    <button onClick={() => handleRemoveLikedFood(item.food_id)}>✕</button>
+                  </p>
+                ))}
+              </div>
             </div>
-            <h3>Je n'aime pas</h3>
+            <h3>Aliments à éviter</h3>
             <div>
               <input
                 placeholder="Rechercher un aliment"
@@ -240,16 +310,19 @@ async function handleDislikedFoodSearch() {
               <button onClick={handleDislikedFoodSearch}>Rechercher</button>
               {dislikedFoodResults.map((food) => (
                 <div key={food.food_id}>
-                  <button onClick={() => {
-                    const current = profile?.disliked_foods || []
-                    if (!current.includes(food.ciqual_code)) {
-                      setProfile({...profile, disliked_foods: [...current, food.ciqual_code]})
-                    }
-                  }}>
+                  <button onClick={() => handleAddDislikedFood(food)}>
                     {food.name}
                   </button>
                 </div>
               ))}
+              <div>
+                {dislikedFoodsList.map((item) => (
+                  <p key={item.food_id}>
+                    {item.name}
+                    <button onClick={() => handleRemoveDislikedFood(item.food_id)}>✕</button>
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
           <h3>Membres du foyer</h3>
@@ -263,6 +336,7 @@ async function handleDislikedFoodSearch() {
                   setMembers(updatedMembers)
                 }}
               />
+              <button onClick={() => handleRemoveMember(member.id)}>✕</button>
             </div>
           ))}
           <div>
@@ -288,7 +362,6 @@ async function handleDislikedFoodSearch() {
           </div>
         </div>
       ) : (
-        // mode lecture
         <div>
           <button onClick={() => setIsEditing(true)}>Modifier</button>
           <h1>Profil</h1>
@@ -307,8 +380,16 @@ async function handleDislikedFoodSearch() {
           <div>
             <p>{profile?.diet_type}</p>
             <p>{profile?.dietary_constraints}</p>
-            <p>{profile?.liked_foods}</p>
-            <p>{profile?.disliked_foods}</p>
+            <div>
+              {likedFoodsList.map((item) => (
+                <p key={item.food_id}>{item.name}</p>
+              ))}
+            </div>
+            <div>
+              {dislikedFoodsList.map((item) => (
+                <p key={item.food_id}>{item.name}</p>
+              ))}
+            </div>
           </div>
           <h3>Membres du foyer</h3>
           {members.map((member) => (
