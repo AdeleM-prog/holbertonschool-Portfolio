@@ -12,6 +12,7 @@ def update_user(db: Session, user_id: str, data: UserUpdateRequest):
     existing_user = db.query(User).filter(User.id == user_id).first()
     if not existing_user:
         raise HTTPException(status_code=404, detail="Resource not found")
+    print("data reçue:", data.model_dump(exclude_none=True))
     for field, value in data.model_dump(exclude_none=True).items():
         setattr(existing_user, field, value)
     db.commit()
