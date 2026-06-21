@@ -34,7 +34,7 @@ function SearchFood() {
             <button onClick={handleResearch}>Rechercher</button>
             <h3>Résultats de la recherche</h3>
             {results.map((data) => (
-                <div key={data.id}>
+                <div key={data.food_id}>
                     <p>{data.name} {data.calories} {data.proteins} {data.carbs} {data.fats}</p>
                 </div>
             ))}
