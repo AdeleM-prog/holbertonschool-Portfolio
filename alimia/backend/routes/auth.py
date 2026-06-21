@@ -1,5 +1,5 @@
-from schemas.auth import RegisterRequest, LoginRequest
-from services.auth import register, login, verify_token
+from schemas.auth import RegisterRequest, LoginRequest, PasswordUpdateRequest
+from services.auth import register, login, verify_token, update_password
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 from database import get_db
@@ -31,3 +31,8 @@ def user_login(data: LoginRequest, response: Response, db: Session = Depends(get
 @auth_router.get("/me")
 def auth_me(user_id: str = Depends(verify_token)):
     return user_id
+
+@auth_router.patch("/password")
+def updating_password(data: PasswordUpdateRequest, db: Session = Depends(get_db), user_id: str = Depends(verify_token)):
+    updated_password = update_password(db, user_id, data)
+    return updated_password

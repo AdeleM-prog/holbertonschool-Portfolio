@@ -13,6 +13,7 @@ function Register() {
     const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ first_name: firstName, email: email, password: password })
     });
     const data = await response.json()

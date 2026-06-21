@@ -1,6 +1,7 @@
 import bcrypt
 from models.user import User
-from schemas.auth import RegisterRequest, LoginRequest
+from services.users import get_user
+from schemas.auth import RegisterRequest, LoginRequest, PasswordUpdateRequest
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, Depends, Request
 from jose import jwt
@@ -74,6 +75,7 @@ def login(db: Session, data: LoginRequest):
         }
     }
 
+
 def verify_token(request: Request):
     token = request.cookies.get("token")
     print(f"Cookie reçu: {token}")
@@ -84,3 +86,16 @@ def verify_token(request: Request):
         print(f"Erreur decode: {e}")
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     return get_token
+
+
+def update_password(db: Session, user_id: str,  data: PasswordUpdateRequest):
+
+    existing_user = get_user(db, user_id)
+
+    if not bcrypt.checkpw(data.current_password.encode('utf-8'), existing_user.password.encode('utf-8')):
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    else:
+        existing_user.password = bcrypt.hashpw(data.new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    db.commit()
+    return {"message": "Password updated successfully"}
