@@ -16,6 +16,8 @@ function Profile() {
   const [dislikedFoodResults, setDislikedFoodResults] = useState([])
   const [likedFoodsList, setLikedFoodsList] = useState([])
   const [dislikedFoodsList, setDislikedFoodsList] = useState([])
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [passwordData, setPasswordData] = useState({ current_password: "", new_password: "" })
 
   useEffect(() => {
     async function fetchData() {
@@ -25,7 +27,16 @@ function Profile() {
       })
       const data = await response.json()
       if (response.ok) {
-        setProfile(data)
+        if (data.diet_type && !Array.isArray(data.diet_type)) {
+          data.diet_type = []
+        }
+        if (data.meals && !Array.isArray(data.meals)) {
+          data.meals = []
+        }
+        if (data.dietary_constraints && !Array.isArray(data.dietary_constraints)) {
+          data.dietary_constraints = []
+        }
+      setProfile(data)
       } else {
         setError("Profil introuvable")
       }
@@ -74,11 +85,18 @@ function Profile() {
   }
 
   async function handleSave() {
+    const profileToSend = {
+      ...profile,
+      diet_type: Array.isArray(profile.diet_type) ? profile.diet_type : [],
+      meals: Array.isArray(profile.meals) ? profile.meals : [],
+      dietary_constraints: Array.isArray(profile.dietary_constraints) ? profile.dietary_constraints : []
+    }
+    console.log("profile avant envoi:", profile)
     const response = await fetch('/api/users/me', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify(profile)
+      body: JSON.stringify(profileToSend)
     })
     if (response.ok) {
       setIsEditing(false)
@@ -179,6 +197,21 @@ function Profile() {
     })
     if (response.ok) {
       setDislikedFoodsList(dislikedFoodsList.filter(f => f.food_id !== food_id))
+    }
+  }
+
+  async function handlePasswordUpdate() {
+    const response = await fetch('/api/auth/password', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(passwordData)
+    })
+    if (response.ok) {
+      setIsChangingPassword(false)
+      setPasswordData({ current_password: "", new_password: "" })
+    } else {
+      setError("Echec de la mise à jour du mot de passe")
     }
   }
 
@@ -362,6 +395,7 @@ function Profile() {
           </div>
         </div>
       ) : (
+        // mode lecture
         <div>
           <button onClick={() => setIsEditing(true)}>Modifier</button>
           <h1>Profil</h1>
@@ -378,7 +412,7 @@ function Profile() {
           </div>
           <h3>Alimentation</h3>
           <div>
-            <p>{profile?.diet_type}</p>
+            <p>{profile?.diet_type?.join(", ")}</p>
             <p>{profile?.dietary_constraints}</p>
             <div>
               {likedFoodsList.map((item) => (
@@ -397,6 +431,40 @@ function Profile() {
               <p>{member.first_name} {member.gender} {member.birth_date ? calculateAge(member.birth_date) + " ans" : "âge non renseigné"}</p>
             </div>
           ))}
+          <h3>Mon compte</h3>
+          {isChangingPassword ? (
+            <div>
+              <input
+                type="password"
+                placeholder="Mot de passe actuel"
+                value={passwordData.current_password}
+                onChange={(e) => setPasswordData({...passwordData, current_password: e.target.value})}
+              />
+              <input
+                type="password"
+                placeholder="Nouveau mot de passe"
+                value={passwordData.new_password}
+                onChange={(e) => setPasswordData({...passwordData, new_password: e.target.value})}
+              />
+              <button onClick={handlePasswordUpdate}>Confirmer</button>
+              <button onClick={() => setIsChangingPassword(false)}>Annuler</button>
+            </div>
+          ) : (
+            <button onClick={() => setIsChangingPassword(true)}>Modifier le mot de passe</button>
+          )} <br></br>
+          <button onClick={async () => {
+            if (window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")) {
+              const response = await fetch('/api/users/me', {
+                method: 'DELETE',
+                credentials: 'include'
+              })
+              if (response.ok) {
+                window.location.href = '/register'
+              }
+            }
+          }}>
+            Supprimer le compte
+          </button>
         </div>
       )}
     </div>
