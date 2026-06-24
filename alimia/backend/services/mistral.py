@@ -20,9 +20,9 @@ def generate_recipe(db: Session, user, members, ingredients=None):
             {"role": "user", "content":f"""Tu es expert en nutrition reconnu pour la grande qualité de ses recommandations personnalisées en terme d'alimentation, tu es consulté par une application web nutritionnelle pour générer des recettes personnalisées en fonction du profil utilisateur suivant : Genre : {user.gender}, âge : {user.birth_date}, régime : {user.diet_type}, contraintes : {user.dietary_constraints}, aliments aimés : {liked}, aliments évités : {disliked}, nombre de personnes dans le foyer : {user.household_size}.
 Je veux que tu génères une recette en fonction de ses contraintes alimentaires, son régime alimentaire, ses aliments préférés ou à éviter, et les éventuels aliments fournis : {", ".join(ingredients) if ingredients else "aucun ingrédient fourni"}.
 La réponse doit être en français, en format JSON selon la structure suivante :
-{{"title": "...", "ingredients": [{{"name": "...", "quantity": ..., "unit": "..."}}], "steps": ["...", "..."]}}
+{{"title": "...", "ingredients": [{{"name": "...", "state": "...", "quantity": ..., "unit": "..."}}], "steps": ["...", "..."]}}
 Réponds uniquement en JSON, sans texte avant ni après.
-Pour chaque ingrédient, utilise un nom générique en français, sans marque ni préparation complexe, le plus proche possible du nom d'un aliment brut tel qu'on le trouverait dans la base de données nutritionnelle ciqual."""}
+Pour chaque ingrédient, utilise un nom générique en français, utilise le nom des ingrédients au singulier, sans marque ni préparation complexe, le plus proche possible du nom d'un aliment brut tel qu'on le trouverait dans la base de données nutritionnelle ciqual. Pour chaque ingrédient, dans le champ 'state' en choisis l'état le plus pertinent selon le contexte de la recette parmi cette liste : cru, cuit, frais, sec, séché, déshydraté, fumé, grillé, frit, mariné, moulu, pané, précuit, aromatisé, salé, sucré, entier, pelé, nature, vierge, écrémé, pasteurisé, doux, décaféiné, réhydraté, sauvage, épluché, iodé, dénoyauté, dégraissé, vapeur, uht. Si aucun état n'est pertinent, laisse le champ vide."""}
         ],
     )
 

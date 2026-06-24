@@ -2,6 +2,7 @@ from models.recipe import Recipe
 from models.recipe_ingredients import RecipeIngredients
 from models.food import Food
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from fastapi import HTTPException, Response
 from services.users import get_user
 from services.household_members import get_members
@@ -27,19 +28,81 @@ def create_recipe(db: Session, user_id: str, ingredients=None):
     db.flush()
 
     for ingredient in data["ingredients"]:
-        food_match = db.query(Food).filter(Food.name.ilike(f"%{ingredient["name"]}%")).first()
+        state = ingredient.get("state")
+
+        # 1er essai : commence par le terme exact + state
+        food_match = db.query(Food)\
+            .filter(Food.name.ilike(f"{ingredient['name']}%"))\
+            .filter(Food.name.ilike(f"%{state}%") if state else True)\
+            .order_by(func.length(Food.name))\
+            .first()
+
+        # 2e essai : contient le terme exact + state
+        if not food_match:
+            food_match = db.query(Food)\
+                .filter(Food.name.ilike(f"%{ingredient['name']}%"))\
+                .filter(Food.name.ilike(f"%{state}%") if state else True)\
+                .order_by(func.length(Food.name))\
+                .first()
+
+        # 3e essai : contient le premier et le dernier mot
+        if not food_match:
+            words = ingredient['name'].split()
+            if len(words) > 1:
+                food_match = db.query(Food)\
+                    .filter(Food.name.ilike(f"%{words[0]}%"))\
+                    .filter(Food.name.ilike(f"%{words[-1]}%"))\
+                    .order_by(func.length(Food.name))\
+                    .first()
+
+        # 4e essai : premier mot seul
+        if not food_match:
+            food_match = db.query(Food)\
+                .filter(Food.name.ilike(f"%{words[0]}%"))\
+                .order_by(func.length(Food.name))\
+                .first()
+        
+        # 5e essai : dernier mot seul
+        if not food_match:
+            food_match = db.query(Food)\
+                .filter(Food.name.ilike(f"%{words[-1]}%"))\
+                .order_by(func.length(Food.name))\
+                .first()
+        
         food_id = food_match.id if food_match else None
 
         recipe_ingredient = RecipeIngredients(
             recipe_id=recipe.id,
             food_id=food_id,
             quantity=ingredient["quantity"],
-            unit=ingredient["unit"]
+            unit=ingredient["unit"],
+            state=ingredient.get("state")
         )
         db.add(recipe_ingredient)
     db.commit()
     db.refresh(recipe)
 
-    return recipe
+    recipe_ingredients = db.query(RecipeIngredients).filter(RecipeIngredients.recipe_id == recipe.id).all()
+
+    ingredients_list = []
+    for ri in recipe_ingredients:
+        if ri.food_id:
+            food = db.query(Food).filter(Food.id == ri.food_id).first()
+            name = food.name if food else "Inconnu"
+        else:
+            name = "Inconnu"
+        ingredients_list.append({
+            "name": name,
+            "state": ri.state,
+            "quantity": ri.quantity,
+            "unit": ri.unit
+        })
+
+    return {
+        "recipe_id": recipe.id,
+        "title": recipe.name,
+        "ingredients": ingredients_list,
+        "steps": recipe.steps
+    }
 
     

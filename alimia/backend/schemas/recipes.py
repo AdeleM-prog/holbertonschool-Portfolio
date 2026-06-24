@@ -4,6 +4,7 @@ from typing import Optional
 
 class RecipeIngredient(BaseModel):
     name: str
+    state: Optional[str] = None
     quantity: float
     unit: str
 

@@ -10,3 +10,4 @@ class RecipeIngredients(Base):
     food_id = Column(UUID(as_uuid=True), ForeignKey("foods.id"))
     quantity = Column(Float)
     unit = Column(String)
+    state = Column(String, nullable=True)
