@@ -7,6 +7,7 @@ from models.user_liked_foods import LikedFoods
 from models.user_disliked_foods import DislikedFoods
 from models.recipe import Recipe
 from models.recipe_ingredients import RecipeIngredients
+from models.user_favorites import FavoriteRecipes
 from routes.auth import auth_router
 from routes.users import users_router
 from routes.foods import foods_router
