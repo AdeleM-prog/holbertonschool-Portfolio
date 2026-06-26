@@ -4,6 +4,7 @@ import Login from "./pages/Login.jsx"
 import ProtectedRoute from "./pages/ProtectedRoute.jsx"
 import Profile from "./pages/Profile.jsx"
 import SearchFood from "./pages/FoodSearch.jsx"
+import FoodDetail from "./pages/FoodDetail.jsx"
 
 
 function App() {
@@ -27,7 +28,12 @@ function App() {
             <SearchFood/>
           </ProtectedRoute>
         } />
-      </Routes>
+        <Route path="/food/:food_id" element={
+          <ProtectedRoute>
+            <FoodDetail/>
+          </ProtectedRoute>
+        } />
+              </Routes>
     </BrowserRouter>
   )
 }
