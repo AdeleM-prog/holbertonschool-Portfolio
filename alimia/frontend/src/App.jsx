@@ -5,6 +5,7 @@ import ProtectedRoute from "./pages/ProtectedRoute.jsx"
 import Profile from "./pages/Profile.jsx"
 import SearchFood from "./pages/FoodSearch.jsx"
 import FoodDetail from "./pages/FoodDetail.jsx"
+import RecipeGeneration from "./pages/RecipeGeneration.jsx"
 
 
 function App() {
@@ -31,6 +32,11 @@ function App() {
         <Route path="/food/:food_id" element={
           <ProtectedRoute>
             <FoodDetail/>
+          </ProtectedRoute>
+        } />
+        <Route path="/recipe_generation" element={
+          <ProtectedRoute>
+            <RecipeGeneration/>
           </ProtectedRoute>
         } />
               </Routes>
