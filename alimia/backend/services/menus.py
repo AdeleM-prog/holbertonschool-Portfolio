@@ -34,6 +34,7 @@ def generate_menu_service(db: Session, user_id: str, menu_type: str, start_date,
         menu_meal = MenuMeal(
             menu_id=menu.id,
             recipe_id=None,
+            recipe_title=meal["recipe_title"],
             meal_type=meal["meal_type"],
             date=meal["date"]
         )
