@@ -7,6 +7,7 @@ import SearchFood from "./pages/FoodSearch.jsx"
 import FoodDetail from "./pages/FoodDetail.jsx"
 import RecipeGeneration from "./pages/RecipeGeneration.jsx"
 import Favorites from "./pages/Favorites.jsx"
+import MenuGeneration from "./pages/MenuGeneration.jsx"
 
 
 function App() {
@@ -43,6 +44,11 @@ function App() {
         <Route path="/favorites" element={
           <ProtectedRoute>
             <Favorites/>
+          </ProtectedRoute>
+        } />
+        <Route path="/menu_generation" element={
+          <ProtectedRoute>
+            <MenuGeneration/>
           </ProtectedRoute>
         } />
       </Routes>

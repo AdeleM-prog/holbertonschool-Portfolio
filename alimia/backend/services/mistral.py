@@ -45,12 +45,11 @@ def generate_menu(db: Session, user, members, menu_type: str, start_date, priori
     members_info = ", ".join([f"{m.gender} {m.birth_date}" for m in members]) if members else "aucun"
 
     prompt = f"""Tu es expert en nutrition reconnu pour la grande qualité de ses recommandations personnalisées en terme d'alimentation, tu es consulté par une application web nutritionnelle pour générer un menu personnalisé en fonction du profil utilisateur suivant : Genre : {user.gender}, âge : {user.birth_date}, régime : {user.diet_type}, contraintes : {user.dietary_constraints}, aliments aimés : {liked}, aliments évités : {disliked}, repas par jour : {user.meals}, membres du foyer : {members_info}.
-Génère un menu {menu_type} pour la période {period}, en respectant les contraintes alimentaires et les préférences de l'utilisateur.{f" Utilise en priorité ces aliments : {priority_ingredients}." if priority_ingredients else ""}
+Génère un menu {menu_type} pour la période {period}, en respectant les contraintes alimentaires et les préférences de l'utilisateur.{f" Les ingrédients suivants sont à utiliser en priorité car leur date de péremption est proche, intègre-les impérativement dans les 2 à 3 premiers jours du menu en respectant les quantités indiquées et sans les imposer à chaque repas si possible : {priority_ingredients}." if priority_ingredients else ""}
 Les types de repas possibles sont uniquement ceux de la liste suivante : {user.meals}. N'utilise aucun autre type de repas.
 La réponse doit être en français, en format JSON selon la structure suivante :
 {{"meals": [{{"date": "YYYY-MM-DD", "meal_type": "...", "recipe_title": "..."}}]}}
 Réponds uniquement en JSON, sans texte avant ni après."""
-
     response = client.chat.complete(
         model="mistral-large-latest",
         messages=[
