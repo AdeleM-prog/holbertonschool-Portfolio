@@ -8,6 +8,8 @@ from models.user_disliked_foods import DislikedFoods
 from models.recipe import Recipe
 from models.recipe_ingredients import RecipeIngredients
 from models.user_favorites import FavoriteRecipes
+from models.menu import Menu
+from models.menu_meals import MenuMeal
 from routes.auth import auth_router
 from routes.users import users_router
 from routes.foods import foods_router
@@ -16,6 +18,7 @@ from routes.liked_foods import liked_foods_router
 from routes.disliked_foods import disliked_foods_router
 from routes.recipes import recipe_router
 from routes.favorites import favorites_router
+from routes.menus import menu_router
 from models.food import Food
 
 app = FastAPI()
@@ -50,3 +53,4 @@ app.include_router(liked_foods_router)
 app.include_router(disliked_foods_router)
 app.include_router(recipe_router)
 app.include_router(favorites_router)
+app.include_router(menu_router)
