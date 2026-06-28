@@ -34,6 +34,11 @@ function Favorites() {
             <div key={recipe.id}>
                 <h2>{recipe.title}</h2>
                 <ul>
+                    {recipe.ingredients.map((ingredient, index) => (
+                        <li key={index}>{ingredient.name} - {ingredient.quantity} {ingredient.unit}</li>
+                    ))}
+                </ul>
+                <ul>
                     {recipe.steps.map((step, index) => (
                         <li key={index}>{index + 1}. {step}</li>
                     ))}
