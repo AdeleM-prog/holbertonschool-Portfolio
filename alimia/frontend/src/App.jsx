@@ -6,6 +6,7 @@ import Profile from "./pages/Profile.jsx"
 import SearchFood from "./pages/FoodSearch.jsx"
 import FoodDetail from "./pages/FoodDetail.jsx"
 import RecipeGeneration from "./pages/RecipeGeneration.jsx"
+import Favorites from "./pages/Favorites.jsx"
 
 
 function App() {
@@ -39,7 +40,12 @@ function App() {
             <RecipeGeneration/>
           </ProtectedRoute>
         } />
-              </Routes>
+        <Route path="/favorites" element={
+          <ProtectedRoute>
+            <Favorites/>
+          </ProtectedRoute>
+        } />
+      </Routes>
     </BrowserRouter>
   )
 }
