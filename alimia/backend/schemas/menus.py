@@ -21,3 +21,13 @@ class MenuResponse(BaseModel):
     meals: list[MenuMeal]
 
     model_config = {"from_attributes": True}
+
+class MenuUpdateRequest(BaseModel):
+    instructions: Optional[str] = None
+    priority_ingredients: Optional[str] = None
+
+class MenuSaveRequest(BaseModel):
+    type: str
+    start_date: date
+    end_date: date
+    meals: list[MenuMeal]
