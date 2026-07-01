@@ -8,6 +8,7 @@ import FoodDetail from "./pages/FoodDetail.jsx"
 import RecipeGeneration from "./pages/RecipeGeneration.jsx"
 import Favorites from "./pages/Favorites.jsx"
 import MenuGeneration from "./pages/MenuGeneration.jsx"
+import WeeklyMenu from "./pages/WeeklyMenu.jsx"
 
 
 function App() {
@@ -49,6 +50,11 @@ function App() {
         <Route path="/menu_generation" element={
           <ProtectedRoute>
             <MenuGeneration/>
+          </ProtectedRoute>
+        } />
+        <Route path="/weekly_menu" element={
+          <ProtectedRoute>
+            <WeeklyMenu/>
           </ProtectedRoute>
         } />
       </Routes>

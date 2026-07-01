@@ -46,6 +46,7 @@ starlette==1.1.0
 typer==0.26.2
 typing-inspection==0.4.2
 typing_extensions==4.15.0
+unidecode
 urllib3==2.7.0
 uvicorn==0.48.0
 uvloop==0.22.1
