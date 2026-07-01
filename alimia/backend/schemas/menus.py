@@ -14,7 +14,7 @@ class MenuMeal(BaseModel):
     recipe_title: str
 
 class MenuResponse(BaseModel):
-    menu_id: UUID
+    menu_id: Optional[UUID] = None
     type: str
     start_date: date
     end_date: date
@@ -31,3 +31,8 @@ class MenuSaveRequest(BaseModel):
     start_date: date
     end_date: date
     meals: list[MenuMeal]
+
+class MenuDraftUpdateRequest(BaseModel):
+    menu: MenuSaveRequest
+    instructions: Optional[str] = None
+    priority_ingredients: Optional[str] = None
