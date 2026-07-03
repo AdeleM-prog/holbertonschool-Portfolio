@@ -17,6 +17,7 @@ def create_recipe(db: Session, user_id: str, ingredients=None):
         raise HTTPException(status_code=404, detail="Resource not found")
     recipe_generation = recipe_generation.strip().removeprefix("```json").removesuffix("```").strip()
     data = json.loads(recipe_generation)
+    print("DEBUG INGREDIENTS:", json.dumps(data["ingredients"], indent=2, ensure_ascii=False))
     
     recipe = Recipe(
     user_id=user_id,

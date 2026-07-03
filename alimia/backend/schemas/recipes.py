@@ -4,7 +4,6 @@ from typing import Optional
 
 class RecipeIngredient(BaseModel):
     name: str
-    state: Optional[str] = None
     quantity: float
     unit: str
 
@@ -20,3 +19,7 @@ class RecipeResponse(BaseModel):
 
 class RecipeGenerateRequest(BaseModel):
     ingredients:  list[str]
+
+class MenuRecipe(BaseModel):
+    ingredients: list[RecipeIngredient]
+    steps: list[str]

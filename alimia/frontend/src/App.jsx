@@ -57,6 +57,11 @@ function App() {
             <WeeklyMenu/>
           </ProtectedRoute>
         } />
+        <Route path="/weekly_menu/:menu_id" element={
+          <ProtectedRoute>
+            <WeeklyMenu/>
+          </ProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   )
