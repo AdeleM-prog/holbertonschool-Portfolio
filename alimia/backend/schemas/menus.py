@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from schemas.recipes import RecipeIngredient
 from uuid import UUID
 from typing import Optional
 from datetime import date
@@ -8,9 +9,14 @@ class MenuGenerateRequest(BaseModel):
     priority_ingredients: Optional[str] = None
     start_date: date
 
+class MenuRecipe(BaseModel):
+    ingredients: list[RecipeIngredient]
+    steps: list[str]
+
 class MenuMeal(BaseModel):
     date: date
     meal_type: str
+    recipe: MenuRecipe
     recipe_title: str
 
 class MenuResponse(BaseModel):
