@@ -1,9 +1,17 @@
 from models.food import Food
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from uuid import UUID
+from unidecode import unidecode
 
 def search_foods(db: Session, query: str):
-    results = db.query(Food).filter(Food.name.ilike(f"%{query}%")).all()
+    normalized = unidecode(query).lower()
+    results = db.query(Food).filter(func.unaccent(Food.name).ilike(f"%{normalized}%")).all()
+    if not results:
+        words = normalized.split()
+        singular_words = [w[:-1] if w.endswith("s") and len(w) > 3 else w for w in words]
+        singular = " ".join(singular_words)
+        results = db.query(Food).filter(func.unaccent(Food.name).ilike(f"%{singular}%")).all()
     return [
         {
             "food_id": r.id,
