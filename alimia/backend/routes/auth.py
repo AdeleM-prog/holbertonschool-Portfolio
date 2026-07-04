@@ -32,6 +32,11 @@ def user_login(data: LoginRequest, response: Response, db: Session = Depends(get
 def auth_me(user_id: str = Depends(verify_token)):
     return user_id
 
+@auth_router.post("/logout")
+def logout(response: Response, user_id: str = Depends(verify_token)):
+    response.delete_cookie(key="token", httponly=True, samesite="lax")
+    return {"detail": "Déconnexion réussie"}
+
 @auth_router.patch("/password")
 def updating_password(data: PasswordUpdateRequest, db: Session = Depends(get_db), user_id: str = Depends(verify_token)):
     updated_password = update_password(db, user_id, data)

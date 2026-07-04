@@ -453,6 +453,17 @@ function Profile() {
             <button onClick={() => setIsChangingPassword(true)}>Modifier le mot de passe</button>
           )} <br></br>
           <button onClick={async () => {
+            const response = await fetch('/api/auth/logout', {
+              method: 'POST',
+              credentials: 'include'
+            })
+            if (response.ok) {
+              window.location.href = '/login'
+            }
+          }}>
+            Se déconnecter
+          </button> <br></br>
+          <button onClick={async () => {
             if (window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")) {
               const response = await fetch('/api/users/me', {
                 method: 'DELETE',
