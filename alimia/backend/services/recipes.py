@@ -1,3 +1,4 @@
+import re
 from models.recipe import Recipe
 from models.recipe_ingredients import RecipeIngredients
 from models.food import Food
@@ -17,7 +18,6 @@ def create_recipe(db: Session, user_id: str, ingredients=None):
         raise HTTPException(status_code=404, detail="Resource not found")
     recipe_generation = recipe_generation.strip().removeprefix("```json").removesuffix("```").strip()
     data = json.loads(recipe_generation)
-    print("DEBUG INGREDIENTS:", json.dumps(data["ingredients"], indent=2, ensure_ascii=False))
     
     recipe = Recipe(
     user_id=user_id,
@@ -29,44 +29,25 @@ def create_recipe(db: Session, user_id: str, ingredients=None):
     db.flush()
 
     for ingredient in data["ingredients"]:
-        state = ingredient.get("state")
 
-        # 1er essai : commence par le terme exact + state
+        # 1er essai : correspondance exacte
         food_match = db.query(Food)\
-            .filter(Food.name.ilike(f"{ingredient['name']}%"))\
-            .filter(Food.name.ilike(f"%{state}%") if state else True)\
-            .order_by(func.length(Food.name))\
+            .filter(Food.name.ilike(ingredient['name']))\
             .first()
 
-        # 2e essai : contient le terme exact + state
+        # 2e essai : commence par le terme exact, avec frontière de mot
+        if not food_match:
+            escaped_name = re.escape(ingredient['name'])
+            food_match = db.query(Food)\
+                .filter(Food.name.op('~*')(f"^{escaped_name}\\M"))\
+                .order_by(func.length(Food.name))\
+                .first()
+
+        # 3e essai : correspondance sur les entrées génériques (aliment moyen)
         if not food_match:
             food_match = db.query(Food)\
                 .filter(Food.name.ilike(f"%{ingredient['name']}%"))\
-                .filter(Food.name.ilike(f"%{state}%") if state else True)\
-                .order_by(func.length(Food.name))\
-                .first()
-
-        # 3e essai : contient le premier et le dernier mot
-        if not food_match:
-            words = ingredient['name'].split()
-            if len(words) > 1:
-                food_match = db.query(Food)\
-                    .filter(Food.name.ilike(f"%{words[0]}%"))\
-                    .filter(Food.name.ilike(f"%{words[-1]}%"))\
-                    .order_by(func.length(Food.name))\
-                    .first()
-
-        # 4e essai : premier mot seul
-        if not food_match:
-            food_match = db.query(Food)\
-                .filter(Food.name.ilike(f"%{words[0]}%"))\
-                .order_by(func.length(Food.name))\
-                .first()
-        
-        # 5e essai : dernier mot seul
-        if not food_match:
-            food_match = db.query(Food)\
-                .filter(Food.name.ilike(f"%{words[-1]}%"))\
+                .filter(Food.name.ilike("%(aliment moyen)%"))\
                 .order_by(func.length(Food.name))\
                 .first()
         
@@ -105,5 +86,3 @@ def create_recipe(db: Session, user_id: str, ingredients=None):
         "ingredients": ingredients_list,
         "steps": recipe.steps
     }
-
-    

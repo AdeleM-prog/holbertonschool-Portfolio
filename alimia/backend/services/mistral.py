@@ -20,6 +20,7 @@ def generate_recipe(db: Session, user, members, ingredients=None):
 
     response = client.chat.complete(
         model="mistral-large-latest",
+        temperature=1.0,
         messages=[
             {"role": "user", "content":f"""Tu es expert en nutrition reconnu pour la grande qualité de ses recommandations personnalisées en terme d'alimentation, tu es consulté par une application web nutritionnelle pour générer des recettes personnalisées en fonction du profil utilisateur suivant : Genre : {user.gender}, âge : {user.birth_date}, régime : {user.diet_type}, contraintes : {user.dietary_constraints}, aliments aimés : {liked}, aliments évités : {disliked}, nombre de personnes dans le foyer : {user.household_size}.
 Je veux que tu génères une recette en fonction de ses contraintes alimentaires, son régime alimentaire, ses aliments préférés ou à éviter, et les éventuels aliments fournis : {", ".join(ingredients) if ingredients else "aucun ingrédient fourni"}.
@@ -55,6 +56,7 @@ La réponse doit être en français, en format JSON selon la structure suivante 
 Réponds uniquement en JSON, sans texte avant ni après."""
     response = client.chat.complete(
         model="mistral-large-latest",
+        temperature=1.0,
         messages=[
             {"role": "user", "content": prompt}
         ],
