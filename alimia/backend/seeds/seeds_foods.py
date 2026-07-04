@@ -6,6 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database import SessionLocal
 from models.food import Food
+from ciqual_curated_codes import CIQUAL_CURATED_CODES
 
 def clean_value(val):
     if val is None:
@@ -24,7 +25,7 @@ def seed_foods():
         os.path.join(os.path.dirname(__file__), "Table Ciqual 2025_FR_2025_11_03.xlsx"),
         sheet_name="composition nutritionnelle"
     )
-    result = read_file[read_file["alim_grp_nom_fr"] != "entrées et plats\ncomposés"]
+    result = read_file[read_file[read_file.columns[6]].isin(CIQUAL_CURATED_CODES)]
 
     db = SessionLocal()
     try:
