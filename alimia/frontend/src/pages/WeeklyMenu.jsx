@@ -277,6 +277,7 @@ function WeeklyMenu() {
                                 onChange={(e) => setPriorIngredients(e.target.value)}
                             />
                             <button onClick={handleUpdateDraft}>Modifier via l'IA</button>
+                            <button onClick={() => navigate(`/shopping_list/${weekmenu.menu_id}`)}>Voir la liste de courses</button>
                         </div>
                     )}
                 </div>

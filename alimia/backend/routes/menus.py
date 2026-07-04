@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from database import get_db
 from services.auth import verify_token
 from schemas.menus import MenuGenerateRequest, MenuResponse, MenuUpdateRequest, MenuSaveRequest, MenuDraftUpdateRequest
+from schemas.shopping_lists import ShoppingListResponse, ShoppingListItem, ShoppingListItemUpdateRequest
 from services.menus import generate_menu_service, get_menu_by_id, update_menu_service, save_menu, get_current_menu, update_draft_menu_service
+from services.shopping_lists import generate_shopping_list_service, get_shopping_list_service, update_shopping_list_item_service
 
 menu_router = APIRouter(prefix="/menus", tags=["menu_generate"])
 
@@ -30,3 +32,15 @@ def create_menu(data: MenuSaveRequest, db: Session = Depends(get_db), user_id: s
 @menu_router.post("/update-draft", response_model=MenuResponse)
 def update_draft(data: MenuDraftUpdateRequest, db: Session = Depends(get_db), user_id: str = Depends(verify_token)):
     return update_draft_menu_service(db, user_id, data.menu.dict(), data.instructions, data.priority_ingredients)
+
+@menu_router.post("/{menu_id}/shopping-list", response_model=ShoppingListResponse, status_code=201)
+def create_shopping_list(menu_id: str, db: Session = Depends(get_db), user_id: str = Depends(verify_token)):
+    return generate_shopping_list_service(db, user_id, menu_id)
+
+@menu_router.get("/{menu_id}/shopping-list", response_model=ShoppingListResponse)
+def read_shopping_list(menu_id: str, db: Session = Depends(get_db), user_id: str = Depends(verify_token)):
+    return get_shopping_list_service(db, user_id, menu_id)
+
+@menu_router.patch("/{menu_id}/shopping-list/items/{item_id}", response_model=ShoppingListItem)
+def update_shopping_list_item(menu_id: str, item_id: str, data: ShoppingListItemUpdateRequest, db: Session = Depends(get_db), user_id: str = Depends(verify_token)):
+    return update_shopping_list_item_service(db, user_id, menu_id, item_id, data.checked)

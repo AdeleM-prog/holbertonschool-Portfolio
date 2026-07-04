@@ -1,5 +1,6 @@
 import { useState, useEffect} from "react"
 import { useNavigate } from "react-router-dom"
+import Navbar from "../components/Navbar"
 
 
 /**
@@ -41,7 +42,12 @@ function ProtectedRoute({ children }) {
 
   if (isLoading) return null
   if (!isAuthenticated) return null
-  return children
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  )
 }
 
 export default ProtectedRoute

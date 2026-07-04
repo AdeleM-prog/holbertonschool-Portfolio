@@ -9,6 +9,9 @@ import RecipeGeneration from "./pages/RecipeGeneration.jsx"
 import Favorites from "./pages/Favorites.jsx"
 import MenuGeneration from "./pages/MenuGeneration.jsx"
 import WeeklyMenu from "./pages/WeeklyMenu.jsx"
+import ShoppingList from "./pages/ShoppingList.jsx"
+import Dashboard from "./pages/Dashboard.jsx"
+import AskAssistant from "./pages/AskAssistant.jsx"
 
 
 function App() {
@@ -24,7 +27,7 @@ function App() {
         } />
         <Route path="/dashboard" element={
           <ProtectedRoute>
-            <div>Dashboard</div>
+            <Dashboard/>
           </ProtectedRoute>
         } />
         <Route path="/foodsearch" element={
@@ -60,6 +63,16 @@ function App() {
         <Route path="/weekly_menu/:menu_id" element={
           <ProtectedRoute>
             <WeeklyMenu/>
+          </ProtectedRoute>
+        } />
+        <Route path="/shopping_list/:menu_id" element={
+          <ProtectedRoute>
+            <ShoppingList/>
+          </ProtectedRoute>
+        } />
+        <Route path="/ask_assistant" element={
+          <ProtectedRoute>
+            <AskAssistant/>
           </ProtectedRoute>
         } />
       </Routes>

@@ -66,6 +66,7 @@ Réponds uniquement en JSON, sans texte avant ni après."""
 
 
 
+
 def update_menu(db: Session, user, members, existing_menu, instructions=None, priority_ingredients=None):
     
     liked_foods = db.query(Food.name).join(LikedFoods, LikedFoods.food_id == Food.id).filter(LikedFoods.user_id == user.id).all()
@@ -145,5 +146,34 @@ Réponds uniquement en JSON, sans texte avant ni après."""
     response = client.chat.complete(
         model="mistral-large-latest",
         messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+
+
+
+def ask_assistant(db: Session, user, members, question: str, current_menu_meals=None):
+    liked_foods = db.query(Food.name).join(LikedFoods, LikedFoods.food_id == Food.id).filter(LikedFoods.user_id == user.id).all()
+    liked = ", ".join([f[0] for f in liked_foods]) if liked_foods else "aucun"
+    disliked_foods = db.query(Food.name).join(DislikedFoods, DislikedFoods.food_id == Food.id).filter(DislikedFoods.user_id == user.id).all()
+    disliked = ", ".join([f[0] for f in disliked_foods]) if disliked_foods else "aucun"
+    members_info = ", ".join([f"{m.gender} {m.birth_date}" for m in members]) if members else "aucun"
+
+    menu_context = "aucun menu en cours"
+    if current_menu_meals:
+        menu_context = "\n".join([f"{m.meal_type} du {m.date} : {m.recipe_title}" for m in current_menu_meals])
+
+    prompt = f"""Tu es expert en nutrition reconnu pour la grande qualité de ses recommandations personnalisées en terme d'alimentation, tu es consulté par une application web nutritionnelle pour répondre aux questions d'un utilisateur sur l'alimentation et la nutrition. Voici son profil : Genre : {user.gender}, âge : {user.birth_date}, régime : {user.diet_type}, contraintes : {user.dietary_constraints}, aliments aimés : {liked}, aliments évités : {disliked}, membres du foyer : {members_info}.
+Voici son menu de la semaine en cours, pour information si la question s'y rapporte :
+{menu_context}
+Question de l'utilisateur : {question}
+Réponds en français, de façon claire et concise, en tenant compte de son profil et de ses contraintes alimentaires si c'est pertinent pour la question. N'invente pas d'informations nutritionnelles, si tu n'es pas sûr d'une information précise, dis-le plutôt que d'affirmer quelque chose d'incertain."""
+
+    response = client.chat.complete(
+        model="mistral-large-latest",
+        temperature=0.7,
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
     )
     return response.choices[0].message.content
