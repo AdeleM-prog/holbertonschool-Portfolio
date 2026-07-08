@@ -5,6 +5,7 @@ function FavoriteButton({ recipe_id }) {
     const [error, setError] = useState("")
 
     async function add_to_favorites(){
+        setError("")
         const response = await fetch(`/api/users/me/favorites/${recipe_id}`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -18,9 +19,12 @@ function FavoriteButton({ recipe_id }) {
     }
 
     return (
-        <button onClick={add_to_favorites}>
-            {isFavorite ? "❤️" : "🤍"}
-        </button>
+        <>
+            <button onClick={add_to_favorites}>
+                {isFavorite ? "❤️" : "🤍"}
+            </button>
+            {error && <p>{error}</p>}
+        </>
     )
 }
 

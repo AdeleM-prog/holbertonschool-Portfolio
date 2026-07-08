@@ -217,6 +217,7 @@ function Profile() {
 
   return (
     <div>
+      {error && <p>{error}</p>}
       {isEditing ? (
         // mode édition
         <div>

@@ -18,7 +18,11 @@ function Register() {
     });
     const data = await response.json()
     if (response.ok === false){
-      setError(data.detail)
+      if (Array.isArray(data.detail)) {
+        setError("Le mot de passe doit contenir au moins 12 caractères")
+      } else {
+        setError(data.detail)
+      }
     }
     else if (response.ok === true){
       navigate('/login')
@@ -34,11 +38,13 @@ function Register() {
       onChange={(e) => setFirstName(e.target.value)}
       />
       <input
+      type="email"
       placeholder="email"
       value={email}
       onChange={(e) => setEmail(e.target.value)}
       />
       <input
+      type="password"
       placeholder="password"
       value={password}
       onChange={(e) => setPassword(e.target.value)}

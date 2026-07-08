@@ -25,6 +25,7 @@ function FoodDetail() {
         get_food_details()
     }, [food_id])
 
+    if (error) return <div>{error}</div>
     if (!food) return <div>Chargement...</div>
 
     return (

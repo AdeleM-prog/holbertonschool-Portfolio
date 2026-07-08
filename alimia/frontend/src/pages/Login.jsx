@@ -27,16 +27,18 @@ function Login() {
     <div>
       <h1>Connexion</h1>
       <input
+      type="email"
       placeholder="email"
       value={email}
       onChange={(e) => setEmail(e.target.value)}
       />
       <input
+      type="password"
       placeholder="password"
       value={password}
       onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={handleSubmit}>Submit</button>
+      <button onClick={handleSubmit}>Se connecter</button>
       {error && <p>{error}</p>}
     </div>
   )
