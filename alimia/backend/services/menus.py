@@ -35,14 +35,30 @@ def _sanitize_ingredients(ingredients):
     return sanitized
 
 
+def _parse_menu_json(raw_text):
+    cleaned = raw_text.strip().removeprefix("```json").removesuffix("```").strip()
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        return None
+
+
 def generate_menu_service(db: Session, user_id: str, menu_type: str, start_date, priority_ingredients=None):
     connected_user = get_user(db, user_id)
     fam_members = get_members(db, user_id)
+
     menu_generation = generate_menu(db, connected_user, fam_members, menu_type, start_date, priority_ingredients)
     if not menu_generation:
         raise HTTPException(status_code=404, detail="Resource not found")
-    menu_generation = menu_generation.strip().removeprefix("```json").removesuffix("```").strip()
-    data = json.loads(menu_generation)
+
+    data = _parse_menu_json(menu_generation)
+    if data is None:
+        menu_generation = generate_menu(db, connected_user, fam_members, menu_type, start_date, priority_ingredients)
+        if not menu_generation:
+            raise HTTPException(status_code=404, detail="Resource not found")
+        data = _parse_menu_json(menu_generation)
+        if data is None:
+            raise HTTPException(status_code=502, detail="La génération du menu a échoué, merci de réessayer")
 
     end_date = start_date if menu_type == "daily" else start_date + timedelta(days=6)
 
@@ -121,13 +137,16 @@ def update_menu_service(menu_id, user_id, db, instructions, priority_ingredients
 
     connected_user = get_user(db, user_id)
     fam_members = get_members(db, user_id)
-    updt_menu = update_menu(db, connected_user, fam_members, generated_menu, instructions=instructions, priority_ingredients=priority_ingredients)
 
-    updated_menu = updt_menu.strip().removeprefix("```json").removesuffix("```").strip()
+    updt_menu = update_menu(db, connected_user, fam_members, generated_menu, instructions=instructions, priority_ingredients=priority_ingredients)
+    data = _parse_menu_json(updt_menu)
+    if data is None:
+        updt_menu = update_menu(db, connected_user, fam_members, generated_menu, instructions=instructions, priority_ingredients=priority_ingredients)
+        data = _parse_menu_json(updt_menu)
+        if data is None:
+            raise HTTPException(status_code=502, detail="La modification du menu a échoué, merci de réessayer")
 
     db.query(MenuMeal).filter(MenuMeal.menu_id == menu_id).delete()
-
-    data = json.loads(updated_menu)
 
     for meal in data["meals"]:
         recipe_id = None
@@ -187,37 +206,40 @@ def save_menu(db: Session, user_id: str, data: MenuSaveRequest):
     db.flush()
 
     for meal in data.meals:
-        recipe = Recipe(
-            user_id=user_id,
-            name=meal.recipe_title,
-            steps=meal.recipe.steps
-        )
-        db.add(recipe)
-        db.flush()
+        recipe_id = None
+        if meal.recipe:
+            recipe = Recipe(
+                user_id=user_id,
+                name=meal.recipe_title,
+                steps=meal.recipe.steps
+            )
+            db.add(recipe)
+            db.flush()
 
-        for ingredient in meal.recipe.ingredients:
-            name_normalized = unidecode(ingredient.name).lower()
-            food_match = db.query(Food)\
-                .filter(func.unaccent(Food.name).ilike(f"{name_normalized}%"))\
-                .order_by(func.length(Food.name))\
-                .first()
-            if not food_match:
+            for ingredient in meal.recipe.ingredients:
+                name_normalized = unidecode(ingredient.name).lower()
                 food_match = db.query(Food)\
-                    .filter(func.unaccent(Food.name).ilike(f"%{name_normalized}%"))\
+                    .filter(func.unaccent(Food.name).ilike(f"{name_normalized}%"))\
                     .order_by(func.length(Food.name))\
                     .first()
+                if not food_match:
+                    food_match = db.query(Food)\
+                        .filter(func.unaccent(Food.name).ilike(f"%{name_normalized}%"))\
+                        .order_by(func.length(Food.name))\
+                        .first()
 
-            recipe_ingredient = RecipeIngredients(
-                recipe_id=recipe.id,
-                food_id=food_match.id if food_match else None,
-                quantity=ingredient.quantity,
-                unit=ingredient.unit
-            )
-            db.add(recipe_ingredient)
+                recipe_ingredient = RecipeIngredients(
+                    recipe_id=recipe.id,
+                    food_id=food_match.id if food_match else None,
+                    quantity=ingredient.quantity,
+                    unit=ingredient.unit
+                )
+                db.add(recipe_ingredient)
+            recipe_id = recipe.id
 
         menu_meal = MenuMeal(
             menu_id=menu.id,
-            recipe_id=recipe.id,
+            recipe_id=recipe_id,
             recipe_title=meal.recipe_title,
             meal_type=meal.meal_type,
             date=meal.date
@@ -243,7 +265,7 @@ def save_menu(db: Session, user_id: str, data: MenuSaveRequest):
                         for i in meal.recipe.ingredients
                     ],
                     "steps": meal.recipe.steps
-                }
+                } if meal.recipe else None
             }
             for meal in data.meals
         ]
@@ -271,9 +293,15 @@ def update_draft_menu_service(db: Session, user_id: str, draft_menu, instruction
     menu_generation = update_draft_menu(db, connected_user, fam_members, draft_menu, instructions, priority_ingredients)
     if not menu_generation:
         raise HTTPException(status_code=404, detail="Resource not found")
-    
-    menu_generation = menu_generation.strip().removeprefix("```json").removesuffix("```").strip()
-    data = json.loads(menu_generation)
+
+    data = _parse_menu_json(menu_generation)
+    if data is None:
+        menu_generation = update_draft_menu(db, connected_user, fam_members, draft_menu, instructions, priority_ingredients)
+        if not menu_generation:
+            raise HTTPException(status_code=404, detail="Resource not found")
+        data = _parse_menu_json(menu_generation)
+        if data is None:
+            raise HTTPException(status_code=502, detail="La modification du menu a échoué, merci de réessayer")
 
     meals_list = []
     for meal in data["meals"]:
