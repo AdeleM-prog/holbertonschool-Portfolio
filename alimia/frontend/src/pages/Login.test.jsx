@@ -5,6 +5,7 @@ const mockNavigate = jest.fn()
 
 jest.mock("react-router-dom", () => ({
     useNavigate: () => mockNavigate,
+    Link: ({ to, children, ...props }) => <a href={to} {...props}>{children}</a>,
 }))
 
 beforeEach(() => {
@@ -20,10 +21,10 @@ test("redirige vers /dashboard après une connexion réussie", async () => {
 
     render(<Login />)
 
-    fireEvent.change(screen.getByPlaceholderText("email"), {
+    fireEvent.change(screen.getByPlaceholderText("Email"), {
         target: { value: "camille@example.com" },
     })
-    fireEvent.change(screen.getByPlaceholderText("password"), {
+    fireEvent.change(screen.getByPlaceholderText("Mot de passe"), {
         target: { value: "MotDePasseSolide123!" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Se connecter" }))
@@ -49,10 +50,10 @@ test("affiche une erreur si les identifiants sont incorrects", async () => {
 
     render(<Login />)
 
-    fireEvent.change(screen.getByPlaceholderText("email"), {
+    fireEvent.change(screen.getByPlaceholderText("Email"), {
         target: { value: "camille@example.com" },
     })
-    fireEvent.change(screen.getByPlaceholderText("password"), {
+    fireEvent.change(screen.getByPlaceholderText("Mot de passe"), {
         target: { value: "MauvaisMotDePasse" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Se connecter" }))

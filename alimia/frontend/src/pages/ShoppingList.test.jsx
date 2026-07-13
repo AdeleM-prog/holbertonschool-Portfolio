@@ -71,7 +71,7 @@ test("coche un article et applique le style correspondant", async () => {
         expect(screen.getByRole("checkbox")).toBeChecked()
     })
 
-    expect(screen.getByRole("checkbox").closest("label")).toHaveClass("opacity-50")
+    expect(screen.getByRole("checkbox").closest("label")).toHaveClass("text-muted", "line-through")
 })
 
 test("affiche une erreur si la récupération échoue", async () => {

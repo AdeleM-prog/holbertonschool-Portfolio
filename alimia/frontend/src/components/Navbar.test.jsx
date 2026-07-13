@@ -48,9 +48,9 @@ test("applique le style actif au lien correspondant à la page courante", () => 
     })
 
     const inactiveLinks = screen.getAllByRole("button", { name: "Accueil" })
-    inactiveLinks.forEach((link) => {
-        expect(link).toHaveClass("text-gray-400")
-    })
+    expect(inactiveLinks).toHaveLength(2)
+    expect(inactiveLinks[0]).toHaveClass("text-muted")
+    expect(inactiveLinks[1]).toHaveClass("text-green-inactive")
 })
 
 test("navigue vers la bonne page au clic sur un lien", () => {
@@ -64,13 +64,16 @@ test("navigue vers la bonne page au clic sur un lien", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/foodsearch")
 })
 
-test("navigue vers /profile au clic sur l'avatar", () => {
+test("navigue vers /profile via le menu de l'avatar", () => {
     global.fetch.mockReturnValueOnce(new Promise(() => {}))
 
     render(<Navbar />)
 
     const avatars = screen.getAllByText("?")
     fireEvent.click(avatars[0])
+
+    const accountButtons = screen.getAllByRole("button", { name: "Mon compte" })
+    fireEvent.click(accountButtons[0])
 
     expect(mockNavigate).toHaveBeenCalledWith("/profile")
 })
