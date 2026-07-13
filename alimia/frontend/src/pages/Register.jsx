@@ -31,6 +31,12 @@ function Register() {
     }
   }
 
+  function handleKeyDown(e){
+    if (e.key === "Enter") {
+      handleSubmit()
+    }
+  }
+
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-white border border-line rounded-2xl p-6">
@@ -42,6 +48,7 @@ function Register() {
             placeholder="Prénom"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="border border-line rounded-xl px-4 py-2 text-ink outline-none focus:border-green"
           />
           <input
@@ -49,6 +56,7 @@ function Register() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="border border-line rounded-xl px-4 py-2 text-ink outline-none focus:border-green"
           />
           <input
@@ -56,6 +64,7 @@ function Register() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="border border-line rounded-xl px-4 py-2 text-ink outline-none focus:border-green"
           />
         </div>

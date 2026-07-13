@@ -89,6 +89,12 @@ function WeeklyMenu() {
         setLoading(false)
     }
 
+    function handlePriorIngredientsKeyDown(e){
+        if (e.key === "Enter") {
+            handleUpdateDraft()
+        }
+    }
+
     async function handleSave(){
         setLoading(true)
         const response = await fetch(`/api/menus/${weekmenu.menu_id}`, {
@@ -116,7 +122,7 @@ function WeeklyMenu() {
         const Icon = style.icon
         return (
             <div key={index} className="border-b border-line last:border-0">
-                <div className="py-0.5 flex items-center gap-3">
+                <div className="py-1.5 flex items-center gap-3">
                     <div onClick={() => toggleMeal(key)} className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 cursor-pointer ${style.bg} ${style.text}`}>
                         <Icon size={16} strokeWidth={2} />
                     </div>
@@ -255,6 +261,7 @@ function WeeklyMenu() {
                                     placeholder="Ingrédients à utiliser en priorité + date de péremption"
                                     value={prioringredients}
                                     onChange={(e) => setPriorIngredients(e.target.value)}
+                                    onKeyDown={handlePriorIngredientsKeyDown}
                                     className="w-full border border-line rounded-xl px-4 py-2 text-ink outline-none focus:border-green"
                                 />
                                 <div className="flex gap-3 mt-3">

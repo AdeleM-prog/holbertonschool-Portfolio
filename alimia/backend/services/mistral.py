@@ -19,7 +19,7 @@ def generate_recipe(db: Session, user, members, ingredients=None):
     disliked = ", ".join([f[0] for f in disliked_foods]) if disliked_foods else "aucun"
 
     response = client.chat.complete(
-        model="mistral-large-latest",
+        model="mistral-small-latest",
         temperature=1.0,
         response_format={"type": "json_object"},
         messages=[
@@ -61,7 +61,7 @@ La réponse doit être en français, en format JSON selon la structure suivante 
 {{"meals": [{{"date": "YYYY-MM-DD", "meal_type": "...", "recipe_title": "...", "recipe": {{"ingredients": [{{"name": "...", "quantity": ..., "unit": "..."}}], "steps": ["...", "..."]}}}}]}}
 Réponds uniquement en JSON, sans texte avant ni après."""
     response = client.chat.complete(
-        model="mistral-large-latest",
+        model="mistral-small-latest",
         temperature=1.0,
         response_format={"type": "json_object"},
         messages=[
@@ -116,7 +116,7 @@ La réponse doit être en français, en format JSON selon la structure suivante 
 Réponds uniquement en JSON, sans texte avant ni après."""
 
     response = client.chat.complete(
-        model="mistral-large-latest",
+        model="mistral-small-latest",
         response_format={"type": "json_object"},
         messages=[{"role": "user", "content": prompt}],
     )
@@ -151,7 +151,7 @@ La réponse doit être en français, en format JSON selon la structure suivante 
 Réponds uniquement en JSON, sans texte avant ni après."""
 
     response = client.chat.complete(
-        model="mistral-large-latest",
+        model="mistral-small-latest",
         response_format={"type": "json_object"},
         messages=[{"role": "user", "content": prompt}],
     )
@@ -175,7 +175,7 @@ Question de l'utilisateur : {question}
 Réponds en français, de façon claire et concise, en tenant compte de son profil et de ses contraintes alimentaires si c'est pertinent pour la question. N'invente pas d'informations nutritionnelles, si tu n'es pas sûr d'une information précise, dis-le plutôt que d'affirmer quelque chose d'incertain."""
 
     response = client.chat.complete(
-        model="mistral-large-latest",
+        model="mistral-small-latest",
         temperature=0.7,
         messages=[
             {"role": "user", "content": prompt}

@@ -27,6 +27,12 @@ function RecipeGeneration() {
         setLoading(false)
     }
 
+    function handleKeyDown(e){
+        if (e.key === "Enter") {
+            handleGenerate()
+        }
+    }
+
     return (
         <div className="pb-20 lg:pb-6 px-4 lg:px-8 bg-cream min-h-screen">
             <div className="pt-6 max-w-2xl mx-auto">
@@ -37,6 +43,7 @@ function RecipeGeneration() {
                         placeholder="Ajouter des ingrédients, séparés par une virgule..."
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full border border-line rounded-xl px-4 py-2 text-ink outline-none focus:border-green"
                     />
                     <button onClick={handleGenerate} className="bg-green-pastel text-green-pastel-ink rounded-full px-4 py-2">
