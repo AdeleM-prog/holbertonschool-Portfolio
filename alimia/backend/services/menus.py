@@ -16,6 +16,25 @@ from datetime import timedelta
 from datetime import date
 
 
+def _sanitize_ingredients(ingredients):
+    sanitized = []
+    for ingredient in ingredients or []:
+        quantity = ingredient.get("quantity")
+        try:
+            quantity = float(quantity)
+        except (TypeError, ValueError):
+            quantity = 0.0
+        unit = ingredient.get("unit")
+        if not isinstance(unit, str):
+            unit = ""
+        sanitized.append({
+            "name": ingredient.get("name") or "Inconnu",
+            "quantity": quantity,
+            "unit": unit
+        })
+    return sanitized
+
+
 def generate_menu_service(db: Session, user_id: str, menu_type: str, start_date, priority_ingredients=None):
     connected_user = get_user(db, user_id)
     fam_members = get_members(db, user_id)
@@ -29,11 +48,14 @@ def generate_menu_service(db: Session, user_id: str, menu_type: str, start_date,
 
     meals_list = []
     for meal in data["meals"]:
+        recipe = meal.get("recipe")
+        if recipe:
+            recipe["ingredients"] = _sanitize_ingredients(recipe.get("ingredients"))
         meals_list.append({
             "date": meal["date"],
             "meal_type": meal["meal_type"],
             "recipe_title": meal["recipe_title"],
-            "recipe": meal.get("recipe")
+            "recipe": recipe
         })
 
     return {
@@ -79,6 +101,7 @@ def get_menu_by_id(db: Session, user_id: str, menu_id: str):
             "date": meal.date,
             "meal_type": meal.meal_type,
             "recipe_title": meal.recipe_title,
+            "recipe_id": meal.recipe_id,
             "recipe": recipe_data
         })
 
@@ -117,7 +140,7 @@ def update_menu_service(menu_id, user_id, db, instructions, priority_ingredients
             db.add(recipe)
             db.flush()
 
-            for ingredient in meal["recipe"]["ingredients"]:
+            for ingredient in _sanitize_ingredients(meal["recipe"].get("ingredients")):
                 name_normalized = unidecode(ingredient["name"]).lower()
                 food_match = db.query(Food)\
                     .filter(func.unaccent(Food.name).ilike(f"{name_normalized}%"))\
@@ -257,11 +280,14 @@ def update_draft_menu_service(db: Session, user_id: str, draft_menu, instruction
 
     meals_list = []
     for meal in data["meals"]:
+        recipe = meal.get("recipe")
+        if recipe:
+            recipe["ingredients"] = _sanitize_ingredients(recipe.get("ingredients"))
         meals_list.append({
             "date": meal["date"],
             "meal_type": meal["meal_type"],
             "recipe_title": meal["recipe_title"],
-            "recipe": meal.get("recipe")
+            "recipe": recipe
         })
 
     return {
@@ -271,4 +297,3 @@ def update_draft_menu_service(db: Session, user_id: str, draft_menu, instruction
         "end_date": draft_menu["end_date"],
         "meals": meals_list
     }
-

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="460" height="260" viewBox="0 0 460 260" role="img">
+<title>Logo Alimia - icone et titre combines</title>
+<circle cx="90" cy="130" r="70" fill="#DCEEE2"/>
+<rect x="45" y="90" width="90" height="60" rx="18" fill="#8FC9A9"/>
+<path d="M65,150 L55,165 L85,150 Z" fill="#8FC9A9"/>
+<g transform="translate(-50,-20)">
+<path d="M171.8,127.2 L169.6,123.5 L166.0,123.5 L165.0,124.6 L164.7,126.4 L157.7,129.8 L154.8,129.2 L151.1,130.1 L146.1,128.0 L141.5,127.2 L136.5,127.3 L131.4,128.5 L126.2,131.2 L121.8,135.5 L119.2,140.2 L117.9,146.7 L108.4,146.7 L108.0,147.2 L108.3,150.0 L109.7,152.7 L111.4,154.5 L113.4,155.7 L115.6,156.4 L162.9,156.4 L164.9,155.8 L167.5,154.3 L169.3,152.1 L170.4,149.3 L170.5,147.1 L170.2,146.7 L161.2,146.7 L160.3,141.5 L157.9,136.3 L159.0,135.2 L159.5,133.6 L166.3,130.3 L168.1,131.1 L170.2,130.9 L171.7,129.3 Z" fill="#FFFFFF"/>
+</g>
+<text x="190" y="155" font-size="70" font-weight="500" font-family="Arial, sans-serif"><tspan fill="#2C2C2C">Alim</tspan><tspan fill="#5FAE86">IA</tspan></text>
+</svg>

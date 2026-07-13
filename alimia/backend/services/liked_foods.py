@@ -30,5 +30,8 @@ def remove_liked_food(db: Session, user_id: str, food_id: UUID):
     
 
 def get_liked_foods(db: Session, user_id: str):
-    all_liked_foods = db.query(LikedFoods).filter(LikedFoods.user_id == user_id).all()
-    return all_liked_foods
+    rows = db.query(LikedFoods, Food.name)\
+        .join(Food, LikedFoods.food_id == Food.id)\
+        .filter(LikedFoods.user_id == user_id)\
+        .all()
+    return [{"food_id": liked.food_id, "name": name} for liked, name in rows]
