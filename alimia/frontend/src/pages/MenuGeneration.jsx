@@ -90,6 +90,18 @@ function MenuGeneration() {
         setExpandedMeal(expandedMeal === key ? null : key)
     }
 
+    function handleIngredientsKeyDown(e){
+        if (e.key === "Enter") {
+            handleGenerate()
+        }
+    }
+
+    function handleInstructionsKeyDown(e){
+        if (e.key === "Enter") {
+            handleUpdateDraft()
+        }
+    }
+
     const days = []
     if (generated_menu) {
         const start = new Date(generated_menu.start_date)
@@ -106,17 +118,17 @@ function MenuGeneration() {
         const Icon = style.icon
         return (
             <div key={index} className="border-b border-line last:border-0">
-                <div onClick={() => toggleMeal(key)} className="py-3 flex items-center gap-3 cursor-pointer">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${style.bg} ${style.text}`}>
-                        <Icon size={16} strokeWidth={2} />
+                <div onClick={() => toggleMeal(key)} className="py-2 flex items-center gap-2 cursor-pointer">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${style.bg} ${style.text}`}>
+                        <Icon size={14} strokeWidth={2} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                         <p className="text-xs text-muted">{meal.meal_type}</p>
-                        <p className="text-ink">{meal.recipe_title}</p>
+                        <p className="text-ink text-sm line-clamp-2 leading-snug">{meal.recipe_title}</p>
                     </div>
                 </div>
                 {expandedMeal === key && meal.recipe && (
-                    <div className="pb-3 pl-11">
+                    <div className="pb-3 pl-9">
                         <IngredientList ingredients={meal.recipe.ingredients} />
                         <div className="flex flex-col divide-y divide-line">
                             {meal.recipe.steps.map((step, stepIndex) => (
@@ -155,6 +167,7 @@ function MenuGeneration() {
                         <input
                             value={ingredients}
                             onChange={(e) => setIngredients(e.target.value)}
+                            onKeyDown={handleIngredientsKeyDown}
                             className="w-full border border-line rounded-xl px-4 py-2 text-ink outline-none focus:border-green"
                         />
                     </div>
@@ -192,6 +205,7 @@ function MenuGeneration() {
                             <input
                                 value={instructions}
                                 onChange={(e) => setInstructions(e.target.value)}
+                                onKeyDown={handleInstructionsKeyDown}
                                 className="w-full border border-line rounded-xl px-4 py-2 text-ink outline-none focus:border-green"
                             />
                             <div className="flex gap-3 mt-3">
