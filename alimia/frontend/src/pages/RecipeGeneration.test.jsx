@@ -24,7 +24,7 @@ test("affiche la recette générée avec ingrédients, étapes et bouton favori"
 
     render(<RecipeGeneration />)
 
-    fireEvent.change(screen.getByPlaceholderText("Ajouter des ingrédients..."), {
+    fireEvent.change(screen.getByPlaceholderText("Ajouter des ingrédients, séparés par une virgule..."), {
         target: { value: "tomate, basilic" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Générer la recette" }))
@@ -33,8 +33,8 @@ test("affiche la recette générée avec ingrédients, étapes et bouton favori"
         expect(screen.getByText("Salade de tomates")).toBeInTheDocument()
     })
 
-    expect(screen.getByText("1. Tomate - 200 g")).toBeInTheDocument()
-    expect(screen.getByText("1. Couper les tomates")).toBeInTheDocument()
+    expect(screen.getByText((content, element) => element.tagName.toLowerCase() === "span" && element.textContent === "Tomate - 200 g")).toBeInTheDocument()
+    expect(screen.getByText("Couper les tomates")).toBeInTheDocument()
     expect(screen.getByTestId("favorite-button")).toHaveTextContent("Favori 42")
 
     expect(global.fetch).toHaveBeenCalledWith(

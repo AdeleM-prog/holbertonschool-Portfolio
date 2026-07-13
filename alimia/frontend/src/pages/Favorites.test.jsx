@@ -1,16 +1,17 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import Favorites from "./Favorites"
 
 beforeEach(() => {
     global.fetch = jest.fn()
 })
 
-test("affiche une recette favorite avec ses ingrédients et étapes", async () => {
+test("affiche une recette favorite avec ses ingrédients et étapes une fois dépliée", async () => {
     global.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ([
             {
                 id: "1",
+                recipe_id: "r1",
                 title: "Salade de quinoa",
                 ingredients: [
                     { name: "Quinoa", quantity: 100, unit: "g" },
@@ -26,9 +27,11 @@ test("affiche une recette favorite avec ses ingrédients et étapes", async () =
         expect(screen.getByText("Salade de quinoa")).toBeInTheDocument()
     })
 
-    expect(screen.getByText(/Quinoa - 100 g/)).toBeInTheDocument()
-    expect(screen.getByText("1. Cuire le quinoa")).toBeInTheDocument()
-    expect(screen.getByText("2. Servir froid")).toBeInTheDocument()
+    fireEvent.click(screen.getByText("Salade de quinoa"))
+
+    expect(screen.getByText((content, element) => element.tagName.toLowerCase() === "span" && element.textContent === "Quinoa - 100 g")).toBeInTheDocument()
+    expect(screen.getByText("Cuire le quinoa")).toBeInTheDocument()
+    expect(screen.getByText("Servir froid")).toBeInTheDocument()
 })
 
 test("n'affiche aucune erreur si la liste est vide", async () => {

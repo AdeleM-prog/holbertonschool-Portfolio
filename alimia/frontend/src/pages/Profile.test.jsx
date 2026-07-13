@@ -49,10 +49,11 @@ test("affiche le profil en mode lecture après le chargement", async () => {
     })
 
     expect(screen.getByText("camille@example.com")).toBeInTheDocument()
-    expect(screen.getByText(String(calculateAge("1995-06-15")))).toBeInTheDocument()
+    expect(screen.getByText(`${calculateAge("1995-06-15")} ans`)).toBeInTheDocument()
     expect(screen.getByText("Pomme")).toBeInTheDocument()
     expect(screen.getByText("Coriandre")).toBeInTheDocument()
-    expect(screen.getByText(/Léo Homme/)).toBeInTheDocument()
+    expect(screen.getByText("Léo")).toBeInTheDocument()
+    expect(screen.getByText(/Homme/)).toBeInTheDocument()
 })
 
 test("passe en mode édition, modifie le prénom et enregistre", async () => {
@@ -160,12 +161,12 @@ test("recherche et ajoute un aliment préféré", async () => {
     fireEvent.click(searchButtons[0])
 
     await waitFor(() => {
-        expect(screen.getByRole("button", { name: "Pomme" })).toBeInTheDocument()
+        expect(screen.getByRole("button", { name: "+ Pomme" })).toBeInTheDocument()
     })
 
     global.fetch.mockResolvedValueOnce({ ok: true })
 
-    fireEvent.click(screen.getByRole("button", { name: "Pomme" }))
+    fireEvent.click(screen.getByRole("button", { name: "+ Pomme" }))
 
     await waitFor(() => {
         expect(global.fetch).toHaveBeenLastCalledWith(
@@ -184,7 +185,7 @@ test("change le mot de passe avec succès", async () => {
         expect(screen.getByText("Camille")).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByRole("button", { name: "Modifier le mot de passe" }))
+    fireEvent.click(screen.getByRole("button", { name: "Modifier mon mot de passe" }))
 
     fireEvent.change(screen.getByPlaceholderText("Mot de passe actuel"), {
         target: { value: "AncienMotDePasse123!" },
@@ -211,7 +212,7 @@ test("affiche une erreur si le changement de mot de passe échoue", async () => 
         expect(screen.getByText("Camille")).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByRole("button", { name: "Modifier le mot de passe" }))
+    fireEvent.click(screen.getByRole("button", { name: "Modifier mon mot de passe" }))
 
     fireEvent.change(screen.getByPlaceholderText("Mot de passe actuel"), {
         target: { value: "MauvaisMotDePasse" },

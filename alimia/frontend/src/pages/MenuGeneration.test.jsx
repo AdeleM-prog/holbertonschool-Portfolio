@@ -20,7 +20,7 @@ const sampleMenu = {
     meals: [
         {
             date: "2026-07-08",
-            meal_type: "dinner",
+            meal_type: "Dîner",
             recipe_title: "Soupe de légumes",
             recipe: {
                 ingredients: [{ name: "Carotte", quantity: 200, unit: "g" }],
@@ -61,7 +61,7 @@ test("génère un menu et permet de déplier une recette", async () => {
         expect(screen.getAllByText(/Carotte/).length).toBeGreaterThan(0)
     })
 
-    expect(screen.getAllByText("1. Éplucher").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Éplucher").length).toBeGreaterThan(0)
 })
 
 test("affiche une erreur si la génération échoue", async () => {
