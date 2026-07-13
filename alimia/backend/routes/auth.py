@@ -1,3 +1,4 @@
+import os
 from schemas.auth import RegisterRequest, LoginRequest, PasswordUpdateRequest
 from services.auth import register, login, verify_token, update_password
 from fastapi import APIRouter, Depends, Response
@@ -6,14 +7,21 @@ from database import get_db
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
+IS_PRODUCTION = os.getenv("ENVIRONMENT") == "production"
+
+COOKIE_SETTINGS = {
+    "httponly": True,
+    "samesite": "none" if IS_PRODUCTION else "lax",
+    "secure": IS_PRODUCTION,
+}
+
 @auth_router.post("/register")
 def register_user(data: RegisterRequest, response: Response, db: Session = Depends(get_db)):
     regist_user = register(db, data)
     response.set_cookie(
         key="token",
         value=regist_user["token"],
-        httponly=True,
-        samesite="lax",
+        **COOKIE_SETTINGS,
     )
     return {"user_id": regist_user["user_id"]}
 
@@ -23,8 +31,7 @@ def user_login(data: LoginRequest, response: Response, db: Session = Depends(get
     response.set_cookie(
         key="token",
         value=user_log_in["token"],
-        httponly=True,
-        samesite="lax",
+        **COOKIE_SETTINGS,
     )
     return {"user_id": user_log_in["user_id"], "profile": user_log_in["profile"]}
 
@@ -34,7 +41,12 @@ def auth_me(user_id: str = Depends(verify_token)):
 
 @auth_router.post("/logout")
 def logout(response: Response, user_id: str = Depends(verify_token)):
-    response.delete_cookie(key="token", httponly=True, samesite="lax")
+    response.delete_cookie(
+        key="token",
+        httponly=True,
+        samesite=COOKIE_SETTINGS["samesite"],
+        secure=COOKIE_SETTINGS["secure"],
+    )
     return {"detail": "Déconnexion réussie"}
 
 @auth_router.patch("/password")
