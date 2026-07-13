@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import IngredientList from "../components/IngredientList"
 import RecipeStep from "../components/RecipeStep"
+import FavoriteButton from "../components/FavoriteButton"
+import { mealStyle } from "../utils/mealStyles"
 
 function WeeklyMenu() {
     const { menu_id } = useParams()
@@ -109,47 +111,63 @@ function WeeklyMenu() {
         setLoading(false)
     }
 
+    function renderMealCard(meal, index, key, showFavorite){
+        const style = mealStyle(meal.meal_type)
+        const Icon = style.icon
+        return (
+            <div key={index} className="border-b border-line last:border-0">
+                <div className="py-0.5 flex items-center gap-3">
+                    <div onClick={() => toggleMeal(key)} className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 cursor-pointer ${style.bg} ${style.text}`}>
+                        <Icon size={16} strokeWidth={2} />
+                    </div>
+                    <div onClick={() => toggleMeal(key)} className="flex-1 cursor-pointer">
+                        <p className="text-xs text-muted">{meal.meal_type}</p>
+                        <p className="text-ink">{meal.recipe_title}</p>
+                    </div>
+                    {showFavorite && meal.recipe_id && (
+                        <FavoriteButton recipe_id={meal.recipe_id} />
+                    )}
+                </div>
+                {expandedMeal === key && meal.recipe && (
+                    <div className="pb-3 pl-11">
+                        <IngredientList ingredients={meal.recipe.ingredients} />
+                        <div className="flex flex-col divide-y divide-line">
+                            {meal.recipe.steps.map((step, stepIndex) => (
+                                <RecipeStep key={stepIndex} text={step} />
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        )
+    }
+
     return (
-        <div>
+        <div className="pb-20 lg:pb-6 px-4 lg:px-8 bg-cream min-h-screen">
             {draftMenu ? (
-                <div>
-                    <h2>Menu proposé</h2>
+                <div className="pt-0 lg:pt-6">
+                    <h2 className="text-lg font-medium text-ink mb-0.5">Menu proposé</h2>
 
                     {/* VUE MOBILE */}
                     <div className="lg:hidden">
-                        <div className="flex gap-2">
-                            {draftDays.map((day, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setSelectedDate(day.toISOString().split('T')[0])}
-                                    className={selecteddate === day.toISOString().split('T')[0] ? "bg-black text-white rounded-full px-3 py-1" : "rounded-full px-3 py-1"}
-                                >
-                                    {day.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })}
-                                </button>
-                            ))}
+                        <div className="flex gap-2 mb-0.5">
+                            {draftDays.map((day, index) => {
+                                const dayStr = day.toISOString().split('T')[0]
+                                return (
+                                    <button
+                                        key={index}
+                                        onClick={() => setSelectedDate(dayStr)}
+                                        className={selecteddate === dayStr ? "bg-green-pastel text-green-pastel-ink rounded-full px-3 py-1" : "rounded-full px-3 py-1 border border-line text-muted"}
+                                    >
+                                        {day.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })}
+                                    </button>
+                                )
+                            })}
                         </div>
-                        <div>
+                        <div className="bg-white border border-line rounded-2xl p-4">
                             {draftMenu.meals
                                 .filter(meal => meal.date === selecteddate)
-                                .map((meal, index) => {
-                                    const key = `${meal.date}_${meal.meal_type}`
-                                    return (
-                                        <div key={index}>
-                                            <div onClick={() => toggleMeal(key)}>
-                                                <p>{meal.meal_type}</p>
-                                                <p>{meal.recipe_title}</p>
-                                            </div>
-                                            {expandedMeal === key && meal.recipe && (
-                                                <div>
-                                                    <IngredientList ingredients={meal.recipe.ingredients} />
-                                                    {meal.recipe.steps.map((step, stepIndex) => (
-                                                        <RecipeStep key={stepIndex} number={stepIndex + 1} text={step} />
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )
-                                })}
+                                .map((meal, index) => renderMealCard(meal, index, `${meal.date}_${meal.meal_type}`, false))}
                         </div>
                     </div>
 
@@ -157,82 +175,61 @@ function WeeklyMenu() {
                     <div className="hidden lg:block">
                         <div className="grid grid-cols-7 gap-2">
                             {draftDays.map((day, index) => (
-                                <div key={index} className="border border-gray-200 rounded-xl p-3">
-                                    <p className="font-medium text-sm mb-2">
+                                <div key={index} className="bg-white border border-line rounded-2xl p-3">
+                                    <p className="font-medium text-sm mb-2 text-ink">
                                         {day.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })}
                                     </p>
                                     {draftMenu.meals
                                         .filter(meal => meal.date === day.toISOString().split('T')[0])
-                                        .map((meal, mealIndex) => {
-                                            const key = `${meal.date}_${meal.meal_type}`
-                                            return (
-                                                <div key={mealIndex} className="mb-2 p-2 bg-gray-50 rounded-lg">
-                                                    <div onClick={() => toggleMeal(key)}>
-                                                        <p className="text-xs text-gray-500">{meal.meal_type}</p>
-                                                        <p className="text-sm">{meal.recipe_title}</p>
-                                                    </div>
-                                                    {expandedMeal === key && meal.recipe && (
-                                                        <div>
-                                                            <IngredientList ingredients={meal.recipe.ingredients} />
-                                                            {meal.recipe.steps.map((step, stepIndex) => (
-                                                                <RecipeStep key={stepIndex} number={stepIndex + 1} text={step} />
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )
-                                        })}
+                                        .map((meal, mealIndex) => renderMealCard(meal, mealIndex, `${meal.date}_${meal.meal_type}`, false))}
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    <button onClick={handleSave} disabled={loading}>{loading ? "Sauvegarde en cours..." : "Valider"}</button>
-                    <button onClick={handleUpdateDraft}>Recommencer</button>
-                    <button onClick={() => setDraftMenu(null)}>Annuler</button>
+                    <div className="flex gap-3 mt-0.5">
+                        <button onClick={handleSave} disabled={loading} className="bg-green-pastel text-green-pastel-ink rounded-full px-4 py-2">
+                            {loading ? "Sauvegarde en cours..." : "Valider"}
+                        </button>
+                        <button onClick={handleUpdateDraft} className="border border-line text-ink rounded-full px-4 py-2">
+                            Recommencer
+                        </button>
+                        <button onClick={() => setDraftMenu(null)} className="text-coral rounded-full px-4 py-2">
+                            Annuler
+                        </button>
+                    </div>
                 </div>
             ) : (
-                <div>
-                    <h1>Menu de la semaine</h1>
-                    {loading && <p>Chargement...</p>}
-                    {error && <button onClick={() => navigate('/menu_generation')}>Générer un menu</button>}
+                <div className="pt-0 lg:pt-6">
+                    <h1 className="text-xl font-medium text-ink mb-0.5">Menu de la semaine</h1>
+                    {loading && <p className="text-muted">Chargement...</p>}
+                    {error && (
+                        <button onClick={() => navigate('/menu_generation')} className="bg-green-pastel text-green-pastel-ink rounded-full px-4 py-2">
+                            Générer un menu
+                        </button>
+                    )}
                     {weekmenu && (
                         <div>
                             {/* VUE MOBILE */}
                             <div className="lg:hidden">
-                                <div className="flex gap-2">
-                                    {days.map((day, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => setSelectedDate(day.toISOString().split('T')[0])}
-                                            className={selecteddate === day.toISOString().split('T')[0] ? "bg-black text-white rounded-full px-3 py-1" : "rounded-full px-3 py-1"}
-                                        >
-                                            {day.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })}
-                                        </button>
-                                    ))}
+                                <div className="flex gap-2 mb-0.5">
+                                    {days.map((day, index) => {
+                                        const dayStr = day.toISOString().split('T')[0]
+                                        return (
+                                            <button
+                                                key={index}
+                                                onClick={() => setSelectedDate(dayStr)}
+                                                className={selecteddate === dayStr ? "bg-green-pastel text-green-pastel-ink rounded-full px-3 py-1" : "rounded-full px-3 py-1 border border-line text-muted"}
+                                            >
+                                                {day.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })}
+                                            </button>
+                                        )
+                                    })}
                                 </div>
-                                <div>
+                                <div className="bg-white border border-line rounded-2xl p-4">
                                     {weekmenu.meals
                                         .filter(meal => meal.date === selecteddate)
-                                        .map((meal, index) => {
-                                            const key = `${meal.date}_${meal.meal_type}`
-                                            return (
-                                                <div key={index}>
-                                                    <div onClick={() => toggleMeal(key)}>
-                                                        <p>{meal.meal_type}</p>
-                                                        <p>{meal.recipe_title}</p>
-                                                    </div>
-                                                    {expandedMeal === key && meal.recipe && (
-                                                        <div>
-                                                            <IngredientList ingredients={meal.recipe.ingredients} />
-                                                            {meal.recipe.steps.map((step, stepIndex) => (
-                                                                <RecipeStep key={stepIndex} number={stepIndex + 1} text={step} />
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )
-                                        })}
+                                        .map((meal, index) => renderMealCard(meal, index, `${meal.date}_${meal.meal_type}`, true))}
                                 </div>
                             </div>
 
@@ -240,44 +237,35 @@ function WeeklyMenu() {
                             <div className="hidden lg:block">
                                 <div className="grid grid-cols-7 gap-2">
                                     {days.map((day, index) => (
-                                        <div key={index} className="border border-gray-200 rounded-xl p-3">
-                                            <p className="font-medium text-sm mb-2">
+                                        <div key={index} className="bg-white border border-line rounded-2xl p-3">
+                                            <p className="font-medium text-sm mb-2 text-ink">
                                                 {day.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })}
                                             </p>
                                             {weekmenu.meals
                                                 .filter(meal => meal.date === day.toISOString().split('T')[0])
-                                                .map((meal, mealIndex) => {
-                                                    const key = `${meal.date}_${meal.meal_type}`
-                                                    return (
-                                                        <div key={mealIndex} className="mb-2 p-2 bg-gray-50 rounded-lg">
-                                                            <div onClick={() => toggleMeal(key)}>
-                                                                <p className="text-xs text-gray-500">{meal.meal_type}</p>
-                                                                <p className="text-sm">{meal.recipe_title}</p>
-                                                            </div>
-                                                            {expandedMeal === key && meal.recipe && (
-                                                                <div>
-                                                                    <IngredientList ingredients={meal.recipe.ingredients} />
-                                                                    {meal.recipe.steps.map((step, stepIndex) => (
-                                                                        <RecipeStep key={stepIndex} number={stepIndex + 1} text={step} />
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )
-                                                })}
+                                                .map((meal, mealIndex) => renderMealCard(meal, mealIndex, `${meal.date}_${meal.meal_type}`, true))}
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
                             {/* COMMUN AUX DEUX VUES */}
-                            <input
-                                placeholder="Ingrédients à utiliser en priorité + date de péremption"
-                                value={prioringredients}
-                                onChange={(e) => setPriorIngredients(e.target.value)}
-                            />
-                            <button onClick={handleUpdateDraft}>Modifier via l'IA</button>
-                            <button onClick={() => navigate(`/shopping_list/${weekmenu.menu_id}`)}>Voir la liste de courses</button>
+                            <div className="bg-white border border-line rounded-2xl p-4 mt-0.5">
+                                <input
+                                    placeholder="Ingrédients à utiliser en priorité + date de péremption"
+                                    value={prioringredients}
+                                    onChange={(e) => setPriorIngredients(e.target.value)}
+                                    className="w-full border border-line rounded-xl px-4 py-2 text-ink outline-none focus:border-green"
+                                />
+                                <div className="flex gap-3 mt-3">
+                                    <button onClick={handleUpdateDraft} className="border border-line text-ink rounded-full px-4 py-2">
+                                        Modifier via l'IA
+                                    </button>
+                                    <button onClick={() => navigate(`/shopping_list/${weekmenu.menu_id}`)} className="bg-green-pastel text-green-pastel-ink rounded-full px-4 py-2">
+                                        Voir la liste de courses
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

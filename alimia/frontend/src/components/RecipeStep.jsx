@@ -1,6 +1,8 @@
-function RecipeStep({ number, text }) {
+function RecipeStep({ text }) {
     return (
-        <p>{number}. {text}</p>
+        <p className="text-sm text-ink py-1.5">
+            {text}
+        </p>
     )
 }
 
