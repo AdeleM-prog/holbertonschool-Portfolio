@@ -187,40 +187,37 @@ def save_menu(db: Session, user_id: str, data: MenuSaveRequest):
     db.flush()
 
     for meal in data.meals:
-        recipe_id = None
-        if meal.recipe:
-            recipe = Recipe(
-                user_id=user_id,
-                name=meal.recipe_title,
-                steps=meal.recipe.steps
-            )
-            db.add(recipe)
-            db.flush()
+        recipe = Recipe(
+            user_id=user_id,
+            name=meal.recipe_title,
+            steps=meal.recipe.steps
+        )
+        db.add(recipe)
+        db.flush()
 
-            for ingredient in meal.recipe.ingredients:
-                name_normalized = unidecode(ingredient.name).lower()
+        for ingredient in meal.recipe.ingredients:
+            name_normalized = unidecode(ingredient.name).lower()
+            food_match = db.query(Food)\
+                .filter(func.unaccent(Food.name).ilike(f"{name_normalized}%"))\
+                .order_by(func.length(Food.name))\
+                .first()
+            if not food_match:
                 food_match = db.query(Food)\
-                    .filter(func.unaccent(Food.name).ilike(f"{name_normalized}%"))\
+                    .filter(func.unaccent(Food.name).ilike(f"%{name_normalized}%"))\
                     .order_by(func.length(Food.name))\
                     .first()
-                if not food_match:
-                    food_match = db.query(Food)\
-                        .filter(func.unaccent(Food.name).ilike(f"%{name_normalized}%"))\
-                        .order_by(func.length(Food.name))\
-                        .first()
 
-                recipe_ingredient = RecipeIngredients(
-                    recipe_id=recipe.id,
-                    food_id=food_match.id if food_match else None,
-                    quantity=ingredient.quantity,
-                    unit=ingredient.unit
-                )
-                db.add(recipe_ingredient)
-            recipe_id = recipe.id
+            recipe_ingredient = RecipeIngredients(
+                recipe_id=recipe.id,
+                food_id=food_match.id if food_match else None,
+                quantity=ingredient.quantity,
+                unit=ingredient.unit
+            )
+            db.add(recipe_ingredient)
 
         menu_meal = MenuMeal(
             menu_id=menu.id,
-            recipe_id=recipe_id,
+            recipe_id=recipe.id,
             recipe_title=meal.recipe_title,
             meal_type=meal.meal_type,
             date=meal.date
@@ -246,7 +243,7 @@ def save_menu(db: Session, user_id: str, data: MenuSaveRequest):
                         for i in meal.recipe.ingredients
                     ],
                     "steps": meal.recipe.steps
-                } if meal.recipe else None
+                }
             }
             for meal in data.meals
         ]

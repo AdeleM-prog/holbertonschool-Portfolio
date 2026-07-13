@@ -20,7 +20,11 @@ function Register() {
     });
     const data = await response.json()
     if (response.ok === false){
-      setError(data.detail)
+      if (Array.isArray(data.detail)) {
+        setError("Le mot de passe doit contenir au moins 12 caractères")
+      } else {
+        setError(data.detail)
+      }
     }
     else if (response.ok === true){
       navigate('/login')
