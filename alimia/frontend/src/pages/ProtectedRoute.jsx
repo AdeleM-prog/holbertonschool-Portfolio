@@ -1,5 +1,6 @@
 import { useState, useEffect} from "react"
 import { useNavigate } from "react-router-dom"
+import Navbar from "../components/Navbar"
 
 
 /**
@@ -20,28 +21,39 @@ function ProtectedRoute({ children }) {
 
   // vérification de la connexion
   useEffect(() => {
+    let ignore = false
+
     async function checkAuth() {
       await new Promise(resolve => setTimeout(resolve, 100))
+      if (ignore) return
       const response = await fetch('/api/auth/me', {
-      method: 'GET',
-      credentials: 'include' //sending cookie in the request
-    })
-    // si connecté → afficher children
-    // si non connecté → rediriger vers /login
-    if (response.ok){
-      setIsAuthenticated(true)
+        method: 'GET',
+        credentials: 'include'
+      })
+      if (ignore) return
+      if (response.ok){
+        setIsAuthenticated(true)
+      }
+      else {
+        navigate('/login')
+      }
+      setIsLoading(false)
     }
-    else {
-      navigate('/login')
+    checkAuth()
+
+    return () => {
+      ignore = true
     }
-    setIsLoading(false)
-  }
-  checkAuth()
   }, [])
 
   if (isLoading) return null
   if (!isAuthenticated) return null
-  return children
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  )
 }
 
 export default ProtectedRoute

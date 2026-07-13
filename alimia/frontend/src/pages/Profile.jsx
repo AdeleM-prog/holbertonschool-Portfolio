@@ -91,7 +91,6 @@ function Profile() {
       meals: Array.isArray(profile.meals) ? profile.meals : [],
       dietary_constraints: Array.isArray(profile.dietary_constraints) ? profile.dietary_constraints : []
     }
-    console.log("profile avant envoi:", profile)
     const response = await fetch('/api/users/me', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -215,258 +214,368 @@ function Profile() {
     }
   }
 
+  const inputClass = "border border-line rounded-xl px-4 py-2 text-ink outline-none focus:border-green w-full"
+
   return (
-    <div>
-      {isEditing ? (
-        // mode édition
-        <div>
-          <button onClick={handleSave}>Enregistrer</button>
-          <h1>Profil</h1>
-          <div>
-            <input
-              placeholder="Prénom"
-              value={profile?.first_name || ""}
-              onChange={(e) => setProfile({ ...profile, first_name: e.target.value })}
-            />
-            <input
-              placeholder="Email"
-              value={profile?.email || ""}
-              onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-            />
-          </div>
-          <h3>Informations personnelles</h3>
-          <div>
-            <input
-              type="date"
-              value={profile?.birth_date || ""}
-              onChange={(e) => setProfile({ ...profile, birth_date: e.target.value })}
-            />
-            <select
-              value={profile?.gender || ""}
-              onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-            >
-              <option value="">Genre</option>
-              <option value="Femme">Femme</option>
-              <option value="Homme">Homme</option>
-            </select>
-            <div>
-              {MEALS.map((type) => (
-                <label key={type}>
-                  <input
-                    type="checkbox"
-                    checked={profile?.meals?.includes(type) || false}
-                    onChange={(e) => {
-                      const current = profile?.meals || []
-                      if (e.target.checked) {
-                        setProfile({...profile, meals: [...current, type]})
-                      } else {
-                        setProfile({...profile, meals: current.filter(t => t !== type)})
-                      }
-                    }}
-                  />
-                  {type}
-                </label>
-              ))}
+    <div className="pb-20 lg:pb-6 px-4 lg:px-8 bg-cream min-h-screen">
+      <div className="pt-6 max-w-2xl mx-auto">
+        {isEditing ? (
+          // mode édition
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-medium text-ink">Profil</h1>
+              <button onClick={handleSave} className="bg-green-pastel text-green-pastel-ink rounded-full px-4 py-2">
+                Enregistrer
+              </button>
             </div>
-          </div>
-          <h3>Alimentation</h3>
-          <div>
-            <div>
-              {DIET_TYPES.map((type) => (
-                <label key={type}>
-                  <input
-                    type="checkbox"
-                    checked={profile?.diet_type?.includes(type) || false}
-                    onChange={(e) => {
-                      const current = profile?.diet_type || []
-                      if (e.target.checked) {
-                        setProfile({...profile, diet_type: [...current, type]})
-                      } else {
-                        setProfile({...profile, diet_type: current.filter(t => t !== type)})
-                      }
-                    }}
-                  />
-                  {type}
-                </label>
-              ))}
-            </div>
-            <div>
-              {DIETARY_CONSTRAINTS.map((type) => (
-                <label key={type}>
-                  <input
-                    type="checkbox"
-                    checked={profile?.dietary_constraints?.includes(type) || false}
-                    onChange={(e) => {
-                      const current = profile?.dietary_constraints || []
-                      if (e.target.checked) {
-                        setProfile({...profile, dietary_constraints: [...current, type]})
-                      } else {
-                        setProfile({...profile, dietary_constraints: current.filter(t => t !== type)})
-                      }
-                    }}
-                  />
-                  {type}
-                </label>
-              ))}
-            </div>
-            <h3>Aliments préférés</h3>
-            <div>
+
+            {error && <p className="text-coral text-sm">{error}</p>}
+
+            <div className="bg-white border border-line rounded-2xl p-4 flex flex-col gap-3">
               <input
-                placeholder="Rechercher un aliment"
-                value={likedFoodSearch}
-                onChange={(e) => setLikedFoodSearch(e.target.value)}
+                placeholder="Prénom"
+                value={profile?.first_name || ""}
+                onChange={(e) => setProfile({ ...profile, first_name: e.target.value })}
+                className={inputClass}
               />
-              <button onClick={handleLikedFoodSearch}>Rechercher</button>
-              {likedFoodResults.map((food) => (
-                <div key={food.food_id}>
-                  <button onClick={() => handleAddLikedFood(food)}>
-                    {food.name}
-                  </button>
+              <input
+                placeholder="Email"
+                value={profile?.email || ""}
+                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                className={inputClass}
+              />
+            </div>
+
+            <div className="bg-white border border-line rounded-2xl p-4">
+              <h3 className="text-sm font-medium text-muted mb-3">Informations personnelles</h3>
+              <div className="flex flex-col gap-3">
+                <input
+                  type="date"
+                  value={profile?.birth_date || ""}
+                  onChange={(e) => setProfile({ ...profile, birth_date: e.target.value })}
+                  className={inputClass}
+                />
+                <select
+                  value={profile?.gender || ""}
+                  onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
+                  className={inputClass}
+                >
+                  <option value="">Genre</option>
+                  <option value="Femme">Femme</option>
+                  <option value="Homme">Homme</option>
+                </select>
+                <div className="flex flex-wrap gap-2">
+                  {MEALS.map((type) => (
+                    <label key={type} className="flex items-center gap-2 text-sm text-ink border border-line rounded-full px-3 py-1">
+                      <input
+                        type="checkbox"
+                        checked={profile?.meals?.includes(type) || false}
+                        onChange={(e) => {
+                          const current = profile?.meals || []
+                          if (e.target.checked) {
+                            setProfile({...profile, meals: [...current, type]})
+                          } else {
+                            setProfile({...profile, meals: current.filter(t => t !== type)})
+                          }
+                        }}
+                        className="accent-green"
+                      />
+                      {type}
+                    </label>
+                  ))}
                 </div>
-              ))}
-              <div>
-                {likedFoodsList.map((item) => (
-                  <p key={item.food_id}>
-                    {item.name}
-                    <button onClick={() => handleRemoveLikedFood(item.food_id)}>✕</button>
-                  </p>
-                ))}
               </div>
             </div>
-            <h3>Aliments à éviter</h3>
-            <div>
-              <input
-                placeholder="Rechercher un aliment"
-                value={dislikedFoodSearch}
-                onChange={(e) => setDislikedFoodSearch(e.target.value)}
-              />
-              <button onClick={handleDislikedFoodSearch}>Rechercher</button>
-              {dislikedFoodResults.map((food) => (
-                <div key={food.food_id}>
-                  <button onClick={() => handleAddDislikedFood(food)}>
-                    {food.name}
+
+            <div className="bg-white border border-line rounded-2xl p-4">
+              <h3 className="text-sm font-medium text-muted mb-3">Alimentation</h3>
+              <div className="flex flex-col gap-3">
+                <h4 className="text-sm font-medium text-ink">Régime alimentaire</h4>
+                <div className="flex flex-wrap gap-2">
+                  {DIET_TYPES.map((type) => (
+                    <label key={type} className="flex items-center gap-2 text-sm text-ink border border-line rounded-full px-3 py-1">
+                      <input
+                        type="checkbox"
+                        checked={profile?.diet_type?.includes(type) || false}
+                        onChange={(e) => {
+                          const current = profile?.diet_type || []
+                          if (e.target.checked) {
+                            setProfile({...profile, diet_type: [...current, type]})
+                          } else {
+                            setProfile({...profile, diet_type: current.filter(t => t !== type)})
+                          }
+                        }}
+                        className="accent-green"
+                      />
+                      {type}
+                    </label>
+                  ))}
+                </div>
+
+                <h4 className="text-sm font-medium text-ink">Allergies et intolérances</h4>
+                <div className="flex flex-wrap gap-2">
+                  {DIETARY_CONSTRAINTS.map((type) => (
+                    <label key={type} className="flex items-center gap-2 text-sm text-ink border border-line rounded-full px-3 py-1">
+                      <input
+                        type="checkbox"
+                        checked={profile?.dietary_constraints?.includes(type) || false}
+                        onChange={(e) => {
+                          const current = profile?.dietary_constraints || []
+                          if (e.target.checked) {
+                            setProfile({...profile, dietary_constraints: [...current, type]})
+                          } else {
+                            setProfile({...profile, dietary_constraints: current.filter(t => t !== type)})
+                          }
+                        }}
+                        className="accent-green"
+                      />
+                      {type}
+                    </label>
+                  ))}
+                </div>
+
+                <h4 className="text-sm font-medium text-ink mt-2">Aliments préférés</h4>
+                <div className="flex gap-2">
+                  <input
+                    placeholder="Rechercher un aliment"
+                    value={likedFoodSearch}
+                    onChange={(e) => setLikedFoodSearch(e.target.value)}
+                    className={inputClass}
+                  />
+                  <button onClick={handleLikedFoodSearch} className="border border-line text-ink rounded-xl px-4 py-2 shrink-0">
+                    Rechercher
                   </button>
                 </div>
-              ))}
-              <div>
-                {dislikedFoodsList.map((item) => (
-                  <p key={item.food_id}>
-                    {item.name}
-                    <button onClick={() => handleRemoveDislikedFood(item.food_id)}>✕</button>
-                  </p>
+                {likedFoodResults.map((food) => (
+                  <button key={food.food_id} onClick={() => handleAddLikedFood(food)} className="text-left text-sm text-green">
+                    + {food.name}
+                  </button>
                 ))}
+                <div className="flex flex-wrap gap-2">
+                  {likedFoodsList.map((item) => (
+                    <span key={item.food_id} className="flex items-center gap-2 bg-green-soft text-green-icon rounded-full px-3 py-1 text-sm">
+                      {item.name}
+                      <button onClick={() => handleRemoveLikedFood(item.food_id)}>✕</button>
+                    </span>
+                  ))}
+                </div>
+
+                <h4 className="text-sm font-medium text-ink mt-2">Aliments à éviter</h4>
+                <div className="flex gap-2">
+                  <input
+                    placeholder="Rechercher un aliment"
+                    value={dislikedFoodSearch}
+                    onChange={(e) => setDislikedFoodSearch(e.target.value)}
+                    className={inputClass}
+                  />
+                  <button onClick={handleDislikedFoodSearch} className="border border-line text-ink rounded-xl px-4 py-2 shrink-0">
+                    Rechercher
+                  </button>
+                </div>
+                {dislikedFoodResults.map((food) => (
+                  <button key={food.food_id} onClick={() => handleAddDislikedFood(food)} className="text-left text-sm text-green">
+                    + {food.name}
+                  </button>
+                ))}
+                <div className="flex flex-wrap gap-2">
+                  {dislikedFoodsList.map((item) => (
+                    <span key={item.food_id} className="flex items-center gap-2 bg-coral-inactive/20 text-coral rounded-full px-3 py-1 text-sm">
+                      {item.name}
+                      <button onClick={() => handleRemoveDislikedFood(item.food_id)}>✕</button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-line rounded-2xl p-4">
+              <h3 className="text-sm font-medium text-muted mb-3">Membres du foyer</h3>
+              <div className="flex flex-col gap-2">
+                {members.map((member, index) => (
+                  <div key={member.id} className="flex items-center gap-2">
+                    <input
+                      value={member.first_name}
+                      onChange={(e) => {
+                        const updatedMembers = [...members]
+                        updatedMembers[index] = { ...member, first_name: e.target.value }
+                        setMembers(updatedMembers)
+                      }}
+                      className={inputClass}
+                    />
+                    <button onClick={() => handleRemoveMember(member.id)} className="text-coral shrink-0">✕</button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col gap-2 mt-3">
+                <input
+                  placeholder="Prénom du membre"
+                  value={newMember.first_name}
+                  onChange={(e) => setNewMember({ ...newMember, first_name: e.target.value })}
+                  className={inputClass}
+                />
+                <select
+                  value={newMember.gender}
+                  onChange={(e) => setNewMember({ ...newMember, gender: e.target.value })}
+                  className={inputClass}
+                >
+                  <option value="">Genre</option>
+                  <option value="Femme">Femme</option>
+                  <option value="Homme">Homme</option>
+                </select>
+                <input
+                  type="date"
+                  value={newMember.date_of_birth}
+                  onChange={(e) => setNewMember({ ...newMember, date_of_birth: e.target.value })}
+                  className={inputClass}
+                />
+                <button onClick={handleAddMember} className="border border-line text-ink rounded-full px-4 py-2">
+                  Ajouter un membre
+                </button>
               </div>
             </div>
           </div>
-          <h3>Membres du foyer</h3>
-          {members.map((member, index) => (
-            <div key={member.id}>
-              <input
-                value={member.first_name}
-                onChange={(e) => {
-                  const updatedMembers = [...members]
-                  updatedMembers[index] = { ...member, first_name: e.target.value }
-                  setMembers(updatedMembers)
-                }}
-              />
-              <button onClick={() => handleRemoveMember(member.id)}>✕</button>
+        ) : (
+          // mode lecture
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-medium text-ink">Profil</h1>
+              <button onClick={() => setIsEditing(true)} className="text-green font-medium">
+                Modifier
+              </button>
             </div>
-          ))}
-          <div>
-            <input
-              placeholder="Prénom du membre"
-              value={newMember.first_name}
-              onChange={(e) => setNewMember({ ...newMember, first_name: e.target.value })}
-            />
-            <select
-              value={newMember.gender}
-              onChange={(e) => setNewMember({ ...newMember, gender: e.target.value })}
-            >
-              <option value="">Genre</option>
-              <option value="Femme">Femme</option>
-              <option value="Homme">Homme</option>
-            </select>
-            <input
-              type="date"
-              value={newMember.date_of_birth}
-              onChange={(e) => setNewMember({ ...newMember, date_of_birth: e.target.value })}
-            />
-            <button onClick={handleAddMember}>Ajouter un membre</button>
+
+            <div className="flex flex-col items-center gap-2 py-2">
+              <div className="w-16 h-16 rounded-full bg-green flex items-center justify-center text-white text-xl font-medium">
+                {profile?.first_name ? profile.first_name.charAt(0).toUpperCase() : "?"}
+              </div>
+              <p className="font-medium text-ink">{profile?.first_name}</p>
+              <p className="text-sm text-muted">{profile?.email}</p>
+            </div>
+
+            <div className="bg-white border border-line rounded-2xl p-4">
+              <h3 className="text-xs font-medium text-green uppercase mb-2">Informations personnelles</h3>
+              <div className="flex flex-col">
+                <div className="flex justify-between py-2 border-b border-line">
+                  <span className="text-muted text-sm">Âge</span>
+                  <span className="text-ink">{profile?.birth_date ? `${calculateAge(profile.birth_date)} ans` : "Non renseigné"}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-line">
+                  <span className="text-muted text-sm">Genre</span>
+                  <span className="text-ink">{profile?.gender || "Non renseigné"}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-line">
+                  <span className="text-muted text-sm">Foyer</span>
+                  <span className="text-ink">{profile?.household_size ? `${profile.household_size} personnes` : "Non renseigné"}</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-muted text-sm">Repas par jour</span>
+                  <span className="text-ink">{profile?.meals?.length || 0}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-line rounded-2xl p-4">
+              <h3 className="text-xs font-medium text-green uppercase mb-2">Alimentation</h3>
+              <div className="flex flex-col">
+                <div className="flex justify-between py-2 border-b border-line">
+                  <span className="text-muted text-sm">Régime</span>
+                  <span className="text-ink">{profile?.diet_type?.join(", ") || "Aucun"}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-line">
+                  <span className="text-muted text-sm">Allergies</span>
+                  <span className="text-ink text-right">{profile?.dietary_constraints?.join(", ") || "Aucune"}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-line">
+                  <span className="text-muted text-sm">J'aime</span>
+                  <span className="text-ink text-right">{likedFoodsList.map(i => i.name).join(", ") || "Aucun"}</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-muted text-sm">J'évite</span>
+                  <span className="text-ink text-right">{dislikedFoodsList.map(i => i.name).join(", ") || "Aucun"}</span>
+                </div>
+              </div>
+            </div>
+
+            {members.length > 0 && (
+              <div className="bg-white border border-line rounded-2xl p-4">
+                <h3 className="text-xs font-medium text-muted uppercase mb-2">Membres du foyer</h3>
+                <div className="flex flex-col">
+                  {members.map((member, index) => (
+                    <div key={member.id} className={`flex justify-between py-2 ${index < members.length - 1 ? "border-b border-line" : ""}`}>
+                      <span className="text-muted text-sm">{member.first_name}</span>
+                      <span className="text-ink">{member.gender} {member.birth_date ? `${calculateAge(member.birth_date)} ans` : "âge non renseigné"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white border border-line rounded-2xl p-4">
+              <h3 className="text-xs font-medium text-green uppercase mb-3">Sécurité</h3>
+
+              {isChangingPassword ? (
+                <div className="flex flex-col gap-2">
+                  <input
+                    type="password"
+                    placeholder="Mot de passe actuel"
+                    value={passwordData.current_password}
+                    onChange={(e) => setPasswordData({...passwordData, current_password: e.target.value})}
+                    className={inputClass}
+                  />
+                  <input
+                    type="password"
+                    placeholder="Nouveau mot de passe"
+                    value={passwordData.new_password}
+                    onChange={(e) => setPasswordData({...passwordData, new_password: e.target.value})}
+                    className={inputClass}
+                  />
+                  <div className="flex gap-2">
+                    <button onClick={handlePasswordUpdate} className="bg-green-pastel text-green-pastel-ink rounded-full px-4 py-2">
+                      Confirmer
+                    </button>
+                    <button onClick={() => setIsChangingPassword(false)} className="border border-line text-ink rounded-full px-4 py-2">
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button onClick={() => setIsChangingPassword(true)} className="text-muted text-sm">
+                  Modifier mon mot de passe
+                </button>
+              )}
+
+              {error && <p className="text-coral text-sm mt-2">{error}</p>}
+
+              <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-line">
+                <button onClick={async () => {
+                  const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                  })
+                  if (response.ok) {
+                    window.location.href = '/login'
+                  }
+                }} className="text-ink text-sm text-left">
+                  Se déconnecter
+                </button>
+                <button onClick={async () => {
+                  if (window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")) {
+                    const response = await fetch('/api/users/me', {
+                      method: 'DELETE',
+                      credentials: 'include'
+                    })
+                    if (response.ok) {
+                      window.location.href = '/register'
+                    }
+                  }
+                }} className="text-coral text-sm text-left">
+                  Supprimer le compte
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      ) : (
-        // mode lecture
-        <div>
-          <button onClick={() => setIsEditing(true)}>Modifier</button>
-          <h1>Profil</h1>
-          <div>
-            <p>{profile?.first_name}</p>
-            <p>{profile?.email}</p>
-          </div>
-          <h3>Informations personnelles</h3>
-          <div>
-            <p>{profile?.birth_date ? calculateAge(profile.birth_date) : "Non renseigné"}</p>
-            <p>{profile?.gender}</p>
-            <p>{profile?.household_size}</p>
-            <p>{profile?.meals}</p>
-          </div>
-          <h3>Alimentation</h3>
-          <div>
-            <p>{profile?.diet_type?.join(", ")}</p>
-            <p>{profile?.dietary_constraints}</p>
-            <div>
-              {likedFoodsList.map((item) => (
-                <p key={item.food_id}>{item.name}</p>
-              ))}
-            </div>
-            <div>
-              {dislikedFoodsList.map((item) => (
-                <p key={item.food_id}>{item.name}</p>
-              ))}
-            </div>
-          </div>
-          <h3>Membres du foyer</h3>
-          {members.map((member) => (
-            <div key={member.id}>
-              <p>{member.first_name} {member.gender} {member.birth_date ? calculateAge(member.birth_date) + " ans" : "âge non renseigné"}</p>
-            </div>
-          ))}
-          <h3>Mon compte</h3>
-          {isChangingPassword ? (
-            <div>
-              <input
-                type="password"
-                placeholder="Mot de passe actuel"
-                value={passwordData.current_password}
-                onChange={(e) => setPasswordData({...passwordData, current_password: e.target.value})}
-              />
-              <input
-                type="password"
-                placeholder="Nouveau mot de passe"
-                value={passwordData.new_password}
-                onChange={(e) => setPasswordData({...passwordData, new_password: e.target.value})}
-              />
-              <button onClick={handlePasswordUpdate}>Confirmer</button>
-              <button onClick={() => setIsChangingPassword(false)}>Annuler</button>
-            </div>
-          ) : (
-            <button onClick={() => setIsChangingPassword(true)}>Modifier le mot de passe</button>
-          )} <br></br>
-          <button onClick={async () => {
-            if (window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")) {
-              const response = await fetch('/api/users/me', {
-                method: 'DELETE',
-                credentials: 'include'
-              })
-              if (response.ok) {
-                window.location.href = '/register'
-              }
-            }
-          }}>
-            Supprimer le compte
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

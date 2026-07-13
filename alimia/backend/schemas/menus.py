@@ -18,6 +18,7 @@ class MenuMeal(BaseModel):
     meal_type: str
     recipe: MenuRecipe
     recipe_title: str
+    recipe_id: Optional[UUID] = None
 
 class MenuResponse(BaseModel):
     menu_id: Optional[UUID] = None

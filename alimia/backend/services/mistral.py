@@ -19,11 +19,17 @@ def generate_recipe(db: Session, user, members, ingredients=None):
     disliked = ", ".join([f[0] for f in disliked_foods]) if disliked_foods else "aucun"
 
     response = client.chat.complete(
-        model="mistral-large-latest",
+        model="mistral-small-latest",
         temperature=1.0,
+        response_format={"type": "json_object"},
         messages=[
             {"role": "user", "content":f"""Tu es expert en nutrition reconnu pour la grande qualité de ses recommandations personnalisées en terme d'alimentation, tu es consulté par une application web nutritionnelle pour générer des recettes personnalisées en fonction du profil utilisateur suivant : Genre : {user.gender}, âge : {user.birth_date}, régime : {user.diet_type}, contraintes : {user.dietary_constraints}, aliments aimés : {liked}, aliments évités : {disliked}, nombre de personnes dans le foyer : {user.household_size}.
-Je veux que tu génères une recette en fonction de ses contraintes alimentaires, son régime alimentaire, ses aliments préférés ou à éviter, et les éventuels aliments fournis : {", ".join(ingredients) if ingredients else "aucun ingrédient fourni"}.
+Je veux que tu génères une recette en fonction de ses contraintes alimentaires et son régime alimentaire, en tenant compte de ses aliments préférés ou à éviter pour les ingrédients complémentaires.
+Ingrédients disponibles pour cette recette précise : {", ".join(ingredients) if ingredients else "aucun ingrédient fourni"}.
+Ces ingrédients disponibles forment un stock dans lequel tu peux piocher, pas une liste à utiliser en intégralité. Choisis un concept de recette cohérent et réaliste en te basant sur celles de ces disponibilités qui vont bien ensemble, sans jamais forcer dans une même recette des ingrédients qui ne se marient pas naturellement (par exemple riz et pâtes en même temps). Deux règles strictes à respecter :
+1. Tout ingrédient disponible que tu choisis d'utiliser doit être utilisé tel quel, avec un rôle réel dans au moins une étape et une quantité non nulle. Ne le remplace jamais par un autre aliment que tu jugerais plus adapté, même si un aliment préféré du profil te semble meilleur.
+2. Tout ingrédient disponible que tu choisis de ne pas utiliser ne doit apparaître nulle part dans ta réponse, ni dans la liste d'ingrédients ni dans les étapes. N'ajoute jamais un ingrédient disponible à quantité nulle ou de façon symbolique juste pour qu'il apparaisse dans la liste.
+Les aliments aimés ou évités du profil ne doivent influencer que le choix des ingrédients complémentaires que tu ajoutes toi-même en dehors du stock disponible, jamais se substituer à un ingrédient disponible que tu as choisi d'utiliser.
 La réponse doit être en français, en format JSON selon la structure suivante :
 {{"title": "...", "ingredients": [{{"name": "...", "state": "...", "quantity": ..., "unit": "..."}}], "steps": ["...", "..."]}}
 Réponds uniquement en JSON, sans texte avant ni après.
@@ -55,8 +61,9 @@ La réponse doit être en français, en format JSON selon la structure suivante 
 {{"meals": [{{"date": "YYYY-MM-DD", "meal_type": "...", "recipe_title": "...", "recipe": {{"ingredients": [{{"name": "...", "quantity": ..., "unit": "..."}}], "steps": ["...", "..."]}}}}]}}
 Réponds uniquement en JSON, sans texte avant ni après."""
     response = client.chat.complete(
-        model="mistral-large-latest",
+        model="mistral-small-latest",
         temperature=1.0,
+        response_format={"type": "json_object"},
         messages=[
             {"role": "user", "content": prompt}
         ],
@@ -109,7 +116,8 @@ La réponse doit être en français, en format JSON selon la structure suivante 
 Réponds uniquement en JSON, sans texte avant ni après."""
 
     response = client.chat.complete(
-        model="mistral-large-latest",
+        model="mistral-small-latest",
+        response_format={"type": "json_object"},
         messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content
@@ -143,7 +151,34 @@ La réponse doit être en français, en format JSON selon la structure suivante 
 Réponds uniquement en JSON, sans texte avant ni après."""
 
     response = client.chat.complete(
-        model="mistral-large-latest",
+        model="mistral-small-latest",
+        response_format={"type": "json_object"},
         messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+def ask_assistant(db: Session, user, members, question: str, current_menu_meals=None):
+    liked_foods = db.query(Food.name).join(LikedFoods, LikedFoods.food_id == Food.id).filter(LikedFoods.user_id == user.id).all()
+    liked = ", ".join([f[0] for f in liked_foods]) if liked_foods else "aucun"
+    disliked_foods = db.query(Food.name).join(DislikedFoods, DislikedFoods.food_id == Food.id).filter(DislikedFoods.user_id == user.id).all()
+    disliked = ", ".join([f[0] for f in disliked_foods]) if disliked_foods else "aucun"
+    members_info = ", ".join([f"{m.gender} {m.birth_date}" for m in members]) if members else "aucun"
+
+    menu_context = "aucun menu en cours"
+    if current_menu_meals:
+        menu_context = "\n".join([f"{m.meal_type} du {m.date} : {m.recipe_title}" for m in current_menu_meals])
+
+    prompt = f"""Tu es expert en nutrition reconnu pour la grande qualité de ses recommandations personnalisées en terme d'alimentation, tu es consulté par une application web nutritionnelle pour répondre aux questions d'un utilisateur sur l'alimentation et la nutrition. Voici son profil : Genre : {user.gender}, âge : {user.birth_date}, régime : {user.diet_type}, contraintes : {user.dietary_constraints}, aliments aimés : {liked}, aliments évités : {disliked}, membres du foyer : {members_info}.
+Voici son menu de la semaine en cours, pour information si la question s'y rapporte :
+{menu_context}
+Question de l'utilisateur : {question}
+Réponds en français, de façon claire et concise, en tenant compte de son profil et de ses contraintes alimentaires si c'est pertinent pour la question. N'invente pas d'informations nutritionnelles, si tu n'es pas sûr d'une information précise, dis-le plutôt que d'affirmer quelque chose d'incertain."""
+
+    response = client.chat.complete(
+        model="mistral-small-latest",
+        temperature=0.7,
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
     )
     return response.choices[0].message.content
