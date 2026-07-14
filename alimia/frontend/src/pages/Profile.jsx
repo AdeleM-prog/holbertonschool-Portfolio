@@ -20,57 +20,83 @@ function Profile() {
   const [passwordData, setPasswordData] = useState({ current_password: "", new_password: "" })
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetch('/api/users/me', {
-        method: 'GET',
-        credentials: 'include'
-      })
-      const data = await response.json()
-      if (response.ok) {
-        if (data.diet_type && !Array.isArray(data.diet_type)) {
-          data.diet_type = []
+    async function fetchProfile() {
+      try {
+        const response = await fetch('/api/users/me', {
+          method: 'GET',
+          credentials: 'include'
+        })
+        const data = await response.json()
+        if (response.ok) {
+          if (data.diet_type && !Array.isArray(data.diet_type)) {
+            data.diet_type = []
+          }
+          if (data.meals && !Array.isArray(data.meals)) {
+            data.meals = []
+          }
+          if (data.dietary_constraints && !Array.isArray(data.dietary_constraints)) {
+            data.dietary_constraints = []
+          }
+          setProfile(data)
+        } else {
+          setError("Profil introuvable")
         }
-        if (data.meals && !Array.isArray(data.meals)) {
-          data.meals = []
-        }
-        if (data.dietary_constraints && !Array.isArray(data.dietary_constraints)) {
-          data.dietary_constraints = []
-        }
-      setProfile(data)
-      } else {
+      } catch (err) {
         setError("Profil introuvable")
       }
+    }
 
-      const responseMembers = await fetch('/api/users/me/household-members', {
-        method: 'GET',
-        credentials: 'include'
-      })
-      const dataMembers = await responseMembers.json()
-      if (responseMembers.ok) {
-        setMembers(dataMembers)
-      } else {
+    async function fetchMembers() {
+      try {
+        const response = await fetch('/api/users/me/household-members/', {
+          method: 'GET',
+          credentials: 'include'
+        })
+        const data = await response.json()
+        if (response.ok) {
+          setMembers(data)
+        } else {
+          setError("Membres du foyer non accessibles")
+        }
+      } catch (err) {
         setError("Membres du foyer non accessibles")
       }
+    }
 
-      const responseLiked = await fetch('/api/users/me/liked-foods/', {
-        method: 'GET',
-        credentials: 'include'
-      })
-      const dataLiked = await responseLiked.json()
-      if (responseLiked.ok) {
-        setLikedFoodsList(dataLiked)
-      }
-
-      const responseDisliked = await fetch('/api/users/me/disliked-foods/', {
-        method: 'GET',
-        credentials: 'include'
-      })
-      const dataDisliked = await responseDisliked.json()
-      if (responseDisliked.ok) {
-        setDislikedFoodsList(dataDisliked)
+    async function fetchLikedFoods() {
+      try {
+        const response = await fetch('/api/users/me/liked-foods/', {
+          method: 'GET',
+          credentials: 'include'
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setLikedFoodsList(data)
+        }
+      } catch (err) {
+        // silencieux, pas critique pour l'affichage du reste de la page
       }
     }
-    fetchData()
+
+    async function fetchDislikedFoods() {
+      try {
+        const response = await fetch('/api/users/me/disliked-foods/', {
+          method: 'GET',
+          credentials: 'include'
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setDislikedFoodsList(data)
+        }
+      } catch (err) {
+        // silencieux, pas critique pour l'affichage du reste de la page
+      }
+    }
+
+    fetchProfile()
+    fetchMembers()
+    fetchLikedFoods()
+    fetchDislikedFoods()
   }, [])
 
   function calculateAge(birthDate) {
