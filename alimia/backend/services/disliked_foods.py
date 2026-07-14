@@ -5,6 +5,12 @@ from uuid import UUID
 from fastapi import HTTPException, Response
 
 def add_disliked_food(db: Session, user_id: str, food_id: UUID):
+    existing = db.query(DislikedFoods).filter(
+        DislikedFoods.user_id == user_id,
+        DislikedFoods.food_id == food_id
+        ).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="Food already in disliked foods")
 
     new_disliked_food = DislikedFoods(user_id=user_id, food_id=food_id)
 
@@ -16,18 +22,17 @@ def add_disliked_food(db: Session, user_id: str, food_id: UUID):
 
 
 def remove_disliked_food(db: Session, user_id: str, food_id: UUID):
-    removed_disliked_food = db.query(DislikedFoods).filter(
+    deleted_count = db.query(DislikedFoods).filter(
         DislikedFoods.user_id == user_id,
         DislikedFoods.food_id == food_id
-        ).first()
-    if not removed_disliked_food:
+        ).delete(synchronize_session=False)
+    if deleted_count == 0:
         raise HTTPException(status_code=404, detail="Resource not found")
-    
-    db.delete(removed_disliked_food)
+
     db.commit()
 
     return Response(status_code=204)
-    
+
 
 def get_disliked_foods(db: Session, user_id: str):
     rows = db.query(DislikedFoods, Food.name)\
