@@ -7,6 +7,6 @@ from database import Base
 class ShoppingList(Base):
     __tablename__ = "shopping_lists"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    menu_id = Column(UUID(as_uuid=True), ForeignKey("menus.id"), nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    menu_id = Column(UUID(as_uuid=True), ForeignKey("menus.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
