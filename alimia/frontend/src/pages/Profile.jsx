@@ -18,6 +18,7 @@ function Profile() {
   const [dislikedFoodsList, setDislikedFoodsList] = useState([])
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [passwordData, setPasswordData] = useState({ current_password: "", new_password: "" })
+  const [foodActionLoading, setFoodActionLoading] = useState(false)
 
   useEffect(() => {
     async function fetchProfile() {
@@ -182,46 +183,72 @@ function Profile() {
   }
 
   async function handleAddLikedFood(food) {
-    const response = await fetch('/api/users/me/liked-foods/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ food_id: food.food_id })
-    })
-    if (response.ok) {
-      setLikedFoodsList([...likedFoodsList, { food_id: food.food_id, name: food.name }])
+    if (foodActionLoading) return
+    if (likedFoodsList.some(f => f.food_id === food.food_id)) return
+    setFoodActionLoading(true)
+    try {
+      const response = await fetch('/api/users/me/liked-foods/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ food_id: food.food_id })
+      })
+      if (response.ok) {
+        setLikedFoodsList([...likedFoodsList, { food_id: food.food_id, name: food.name }])
+      }
+    } finally {
+      setFoodActionLoading(false)
     }
   }
 
   async function handleAddDislikedFood(food) {
-    const response = await fetch('/api/users/me/disliked-foods/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ food_id: food.food_id })
-    })
-    if (response.ok) {
-      setDislikedFoodsList([...dislikedFoodsList, { food_id: food.food_id, name: food.name }])
+    if (foodActionLoading) return
+    if (dislikedFoodsList.some(f => f.food_id === food.food_id)) return
+    setFoodActionLoading(true)
+    try {
+      const response = await fetch('/api/users/me/disliked-foods/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ food_id: food.food_id })
+      })
+      if (response.ok) {
+        setDislikedFoodsList([...dislikedFoodsList, { food_id: food.food_id, name: food.name }])
+      }
+    } finally {
+      setFoodActionLoading(false)
     }
   }
 
   async function handleRemoveLikedFood(food_id) {
-    const response = await fetch(`/api/users/me/liked-foods/${food_id}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    })
-    if (response.ok) {
-      setLikedFoodsList(likedFoodsList.filter(f => f.food_id !== food_id))
+    if (foodActionLoading) return
+    setFoodActionLoading(true)
+    try {
+      const response = await fetch(`/api/users/me/liked-foods/${food_id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+      if (response.ok) {
+        setLikedFoodsList(likedFoodsList.filter(f => f.food_id !== food_id))
+      }
+    } finally {
+      setFoodActionLoading(false)
     }
   }
 
   async function handleRemoveDislikedFood(food_id) {
-    const response = await fetch(`/api/users/me/disliked-foods/${food_id}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    })
-    if (response.ok) {
-      setDislikedFoodsList(dislikedFoodsList.filter(f => f.food_id !== food_id))
+    if (foodActionLoading) return
+    setFoodActionLoading(true)
+    try {
+      const response = await fetch(`/api/users/me/disliked-foods/${food_id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+      if (response.ok) {
+        setDislikedFoodsList(dislikedFoodsList.filter(f => f.food_id !== food_id))
+      }
+    } finally {
+      setFoodActionLoading(false)
     }
   }
 
@@ -373,7 +400,12 @@ function Profile() {
                   </button>
                 </div>
                 {likedFoodResults.map((food) => (
-                  <button key={food.food_id} onClick={() => handleAddLikedFood(food)} className="text-left text-sm text-green">
+                  <button
+                    key={food.food_id}
+                    onClick={() => handleAddLikedFood(food)}
+                    disabled={foodActionLoading}
+                    className="text-left text-sm text-green disabled:opacity-50"
+                  >
                     + {food.name}
                   </button>
                 ))}
@@ -381,7 +413,7 @@ function Profile() {
                   {likedFoodsList.map((item) => (
                     <span key={item.food_id} className="flex items-center gap-2 bg-green-soft text-green-icon rounded-full px-3 py-1 text-sm">
                       {item.name}
-                      <button onClick={() => handleRemoveLikedFood(item.food_id)}>✕</button>
+                      <button onClick={() => handleRemoveLikedFood(item.food_id)} disabled={foodActionLoading} className="disabled:opacity-50">✕</button>
                     </span>
                   ))}
                 </div>
@@ -399,7 +431,12 @@ function Profile() {
                   </button>
                 </div>
                 {dislikedFoodResults.map((food) => (
-                  <button key={food.food_id} onClick={() => handleAddDislikedFood(food)} className="text-left text-sm text-green">
+                  <button
+                    key={food.food_id}
+                    onClick={() => handleAddDislikedFood(food)}
+                    disabled={foodActionLoading}
+                    className="text-left text-sm text-green disabled:opacity-50"
+                  >
                     + {food.name}
                   </button>
                 ))}
@@ -407,7 +444,7 @@ function Profile() {
                   {dislikedFoodsList.map((item) => (
                     <span key={item.food_id} className="flex items-center gap-2 bg-coral-inactive/20 text-coral rounded-full px-3 py-1 text-sm">
                       {item.name}
-                      <button onClick={() => handleRemoveDislikedFood(item.food_id)}>✕</button>
+                      <button onClick={() => handleRemoveDislikedFood(item.food_id)} disabled={foodActionLoading} className="disabled:opacity-50">✕</button>
                     </span>
                   ))}
                 </div>
@@ -491,7 +528,7 @@ function Profile() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-line">
                   <span className="text-muted text-sm">Foyer</span>
-                  <span className="text-ink">{profile?.household_size ? `${profile.household_size} personnes` : "Non renseigné"}</span>
+                  <span className="text-ink">{members.length + 1} personnes</span>
                 </div>
                 <div className="flex justify-between py-2">
                   <span className="text-muted text-sm">Repas par jour</span>

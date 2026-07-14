@@ -17,13 +17,14 @@ def generate_recipe(db: Session, user, members, ingredients=None):
     liked = ", ".join([f[0] for f in liked_foods]) if liked_foods else "aucun"
     disliked_foods = db.query(Food.name).join(DislikedFoods, DislikedFoods.food_id == Food.id).filter(DislikedFoods.user_id == user.id).all()
     disliked = ", ".join([f[0] for f in disliked_foods]) if disliked_foods else "aucun"
+    household_size = len(members) + 1 if members else 1
 
     response = client.chat.complete(
         model="mistral-small-latest",
         temperature=1.0,
         response_format={"type": "json_object"},
         messages=[
-            {"role": "user", "content":f"""Tu es expert en nutrition reconnu pour la grande qualité de ses recommandations personnalisées en terme d'alimentation, tu es consulté par une application web nutritionnelle pour générer des recettes personnalisées en fonction du profil utilisateur suivant : Genre : {user.gender}, âge : {user.birth_date}, régime : {user.diet_type}, contraintes : {user.dietary_constraints}, aliments aimés : {liked}, aliments évités : {disliked}, nombre de personnes dans le foyer : {user.household_size}.
+            {"role": "user", "content":f"""Tu es expert en nutrition reconnu pour la grande qualité de ses recommandations personnalisées en terme d'alimentation, tu es consulté par une application web nutritionnelle pour générer des recettes personnalisées en fonction du profil utilisateur suivant : Genre : {user.gender}, âge : {user.birth_date}, régime : {user.diet_type}, contraintes : {user.dietary_constraints}, aliments aimés : {liked}, aliments évités : {disliked}, nombre de personnes dans le foyer : {household_size}.
 Je veux que tu génères une recette en fonction de ses contraintes alimentaires et son régime alimentaire, en tenant compte de ses aliments préférés ou à éviter pour les ingrédients complémentaires.
 Ingrédients disponibles pour cette recette précise : {", ".join(ingredients) if ingredients else "aucun ingrédient fourni"}.
 Ces ingrédients disponibles forment un stock dans lequel tu peux piocher, pas une liste à utiliser en intégralité. Choisis un concept de recette cohérent et réaliste en te basant sur celles de ces disponibilités qui vont bien ensemble, sans jamais forcer dans une même recette des ingrédients qui ne se marient pas naturellement (par exemple riz et pâtes en même temps). Deux règles strictes à respecter :
